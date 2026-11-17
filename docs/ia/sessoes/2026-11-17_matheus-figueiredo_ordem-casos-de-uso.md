@@ -158,6 +158,26 @@ integrante precisa aprovar — conflito levado ao humano.
 **Arquivos alterados:** `docs/apresentacoes/2026-11-17_planejamento-carrinho.md`,
 `docs/ia/INDICE.md`, `docs/ia/transcripts/`, este registro
 
+**Decisão humana:** aceito o resumo; sobre o merge, o humano não respondeu e pediu para seguir ao passo 1 (PR #1 continua aberto).
+
+### 7
+
+**Prompt (literal):**
+
+```text
+cria uma outra sessao pra gent efazer o passo 1 fundação
+```
+
+**Saída (resumo):** Criada uma nova sessão do Claude Code na nuvem
+(`session_01RBrzSdWNGSMGCAZyEKsnb1`, "BurguerJá — passo 1: fundação do back-end")
+com instruções: seguir AGENTS.md, criar o próprio registro citando este como
+sessão anterior, ler o plano no branch do PR #1 (ainda não mergeado), escopo do
+passo 1 (routers, fixture de banco temporário, centavos RNF-23, mocks SGL e
+geocodificação com timeout RNF-19, ESTRUTURA.md), manter o esboço `recado`,
+não abrir PR nem fazer merge sem pedido, e apresentar um plano antes de codar.
+
+**Arquivos alterados:** este registro
+
 **Decisão humana:** <pendente>
 
 ## Resultado
