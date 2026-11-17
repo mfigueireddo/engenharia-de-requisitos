@@ -35,6 +35,7 @@ entra aqui no mesmo commit.
 ├── docs/
 │   ├── srs/                  ERS em Markdown (srs-pt.md) + figuras (media/)
 │   ├── apresentacoes/        Resumos para o professor (AAAA-MM-DD_<tema>.md)
+│   ├── planejamento/         Levantamentos e planos de implementação (o que falta, ordem dos PRs)
 │   └── ia/                   Registro do uso de IA (ver docs/ia/README.md)
 ├── scripts/ia/autor.sh       Nome do git → identificador usado em docs/ia/
 └── .claude/                  Configuração e hooks do Claude Code
