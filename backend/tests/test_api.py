@@ -1,14 +1,11 @@
 # ESBOÇO-PROVISÓRIO: teste de recados; substituir por testes reais (AGENTS.md, seção 7).
-from fastapi.testclient import TestClient
 
 
-def test_health_e_recados(tmp_path, monkeypatch):
-    from app import db
-    monkeypatch.setattr(db, "DB_PATH", tmp_path / "teste.db")
-    from app.main import app
+def test_recados(client):
+    assert client.post("/api/recados", json={"texto": "oi"}).status_code == 201
+    assert client.get("/api/recados").json()[0]["texto"] == "oi"
+    assert client.post("/api/recados", json={"texto": ""}).status_code == 422
 
-    with TestClient(app) as client:
-        assert client.get("/api/health").json() == {"status": "ok"}
-        assert client.post("/api/recados", json={"texto": "oi"}).status_code == 201
-        assert client.get("/api/recados").json()[0]["texto"] == "oi"
-        assert client.post("/api/recados", json={"texto": ""}).status_code == 422
+
+def test_recados_cada_teste_comeca_com_banco_vazio(client):
+    assert client.get("/api/recados").json() == []

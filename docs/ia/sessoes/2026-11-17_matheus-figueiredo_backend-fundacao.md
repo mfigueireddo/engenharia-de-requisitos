@@ -55,4 +55,54 @@ geocodificação). Não codou nada; aguardando OK.
 
 **Arquivos alterados:** `docs/ia/sessoes/2026-11-17_matheus-figueiredo_backend-fundacao.md` (novo)
 
+**Decisão humana:** aceito — o humano aprovou o plano e as 4 propostas na interação 3.
+
+### 2
+
+**Prompt (literal):**
+
+```text
+Stop hook feedback:
+[command hook 2]: There are untracked files in the repository. Please commit and push these changes to the remote branch.
+```
+
+**Saída (resumo):** mensagem automática do hook de parada do ambiente (não digitada
+pelo humano). A IA commitou o registro da sessão no branch
+`matheus-figueiredo/backend-fundacao` e fez push; nenhum PR aberto. Repetiu as 4
+perguntas pendentes.
+
+**Arquivos alterados:** nenhum novo (commit do registro)
+
+**Decisão humana:** — (mensagem automática)
+
+### 3
+
+**Prompt (literal):**
+
+```text
+tudo aprovado
+```
+
+**Saída (resumo):** a IA implementou o plano aprovado:
+- `db.py` passa a ler `BURGUERJA_DB` a cada conexão (antes só na importação),
+  para a fixture do pytest trocar o banco por um arquivo temporário.
+- Rotas separadas em `app/routers/saude.py` e `app/routers/recados.py`
+  (esboço mantido, marcado `ESBOÇO-PROVISÓRIO`); `main.py` só registra os routers.
+- `app/dinheiro.py` (RNF-23): `de_reais`, `formatar`, `multiplicar`; recusa `float`/`bool`.
+- `app/integracoes/base.py` (RNF-19): `chamar_com_tempo_limite` (thread + timeout,
+  padrão 3 s em `BURGUERJA_TIMEOUT_INTEGRACOES`) e `IntegracaoIndisponivel`.
+- `app/integracoes/sgl.py` (cardápio de exemplo em `dados_simulados/cardapios_sgl.json`;
+  combo sem preço próprio, RF-11) e `app/integracoes/geocodificacao.py` (3 CEPs da
+  Gávea; CEP desconhecido → `None`; marcado como extensão da RNF-19 por decisão Q8).
+- Testes: `conftest.py` (fixtures `banco_temporario` e `client`), `test_saude.py`,
+  `test_dinheiro.py`, `test_integracoes.py` (timeout, erro de conexão e resposta
+  inválida simulados); `test_api.py` passou a usar a fixture.
+- `ESTRUTURA.md`: árvore + regras 9–12; `AGENTS.md` §7: caminhos do esboço atualizados.
+- `cd backend && python -m pytest` → **55 passed** (1 aviso de depreciação do
+  starlette, já existente). `uvicorn` sobe e `/api/health` e `/api/recados` respondem.
+
+**Arquivos alterados:** `backend/app/{db.py,main.py,dinheiro.py}`, `backend/app/routers/*`,
+`backend/app/integracoes/*`, `backend/tests/*`, `ESTRUTURA.md`, `AGENTS.md`
+
 **Decisão humana:** <pendente>
+

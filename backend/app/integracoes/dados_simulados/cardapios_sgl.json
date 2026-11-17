@@ -1,0 +1,12 @@
+{
+  "UN-GAVEA": {
+    "unidade": "UN-GAVEA",
+    "itens": [
+      {"id_sgl": "LAN-01", "nome": "Burguer Clássico", "descricao": "Pão, carne 150 g, queijo e salada", "categoria": "Lanches", "tipo": "SIMPLES", "preco_centavos": 2490, "desconto_centavos": 0},
+      {"id_sgl": "ACO-01", "nome": "Batata frita média", "descricao": "Porção média", "categoria": "Acompanhamentos", "tipo": "SIMPLES", "preco_centavos": 1190, "desconto_centavos": 200},
+      {"id_sgl": "BEB-01", "nome": "Refrigerante lata", "descricao": "350 ml", "categoria": "Bebidas", "tipo": "SIMPLES", "preco_centavos": 690, "desconto_centavos": 0},
+      {"id_sgl": "COM-01", "nome": "Combo Clássico", "descricao": "Burguer Clássico + batata média + refrigerante", "categoria": "Combos", "tipo": "COMBO",
+       "componentes": [{"id_sgl": "LAN-01", "quantidade": 1}, {"id_sgl": "ACO-01", "quantidade": 1}, {"id_sgl": "BEB-01", "quantidade": 1}]}
+    ]
+  }
+}

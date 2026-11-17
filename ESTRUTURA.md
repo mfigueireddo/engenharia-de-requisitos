@@ -18,11 +18,24 @@ entra aqui no mesmo commit.
 ├── backend/                  API — Python + FastAPI + SQLite
 │   ├── requirements.txt      Dependências Python (versões fixas)
 │   ├── app/
-│   │   ├── main.py           Cria o app FastAPI e declara as rotas
-│   │   ├── db.py             Conexão com o SQLite e inicialização do esquema
-│   │   └── schema.sql        DDL do banco (CREATE TABLE ...)
+│   │   ├── main.py           Cria o app FastAPI e registra os routers
+│   │   ├── db.py             Conexão com o SQLite (arquivo em BURGUERJA_DB) e esquema
+│   │   ├── schema.sql        DDL do banco (CREATE TABLE ...)
+│   │   ├── dinheiro.py       Valores em centavos inteiros, sem float (RNF-23)
+│   │   ├── routers/          Rotas da API, um arquivo por funcionalidade
+│   │   │   ├── saude.py      /api/health
+│   │   │   └── recados.py    ESBOÇO-PROVISÓRIO (/api/recados)
+│   │   └── integracoes/      Clientes dos sistemas externos, simulados (RNF-19)
+│   │       ├── base.py       Tempo limite + IntegracaoIndisponivel
+│   │       ├── sgl.py        Cardápio das unidades (SGL)
+│   │       ├── geocodificacao.py  CEP → latitude/longitude por tabela fixa (decisão Q8)
+│   │       └── dados_simulados/   Respostas fixas dos mocks (JSON)
 │   └── tests/
-│       └── test_api.py       Testes da API (pytest + TestClient)
+│       ├── conftest.py       Fixtures: banco SQLite temporário + TestClient
+│       ├── test_saude.py     /api/health e isolamento do banco
+│       ├── test_dinheiro.py  RNF-23
+│       ├── test_integracoes.py  RNF-19 com falhas simuladas
+│       └── test_api.py       ESBOÇO-PROVISÓRIO (recados)
 ├── frontend/                 Interface — TypeScript + React (Vite)
 │   ├── package.json
 │   ├── vite.config.ts        Porta 5173 e proxy de /api para a API (porta 8000)
@@ -56,10 +69,21 @@ entra aqui no mesmo commit.
    da primeira funcionalidade real; a lista completa está no `AGENTS.md`, seção 7.
 8. **Nada vai direto para a `main`.** Cada tarefa num branch `<autor>/<tema>` e
    merge por pull request revisado por outro integrante (`AGENTS.md`, seção 6).
+9. **Rotas em `backend/app/routers/<funcionalidade>.py`**, cada uma com seu
+   `APIRouter`; `main.py` só registra os routers.
+10. **Dinheiro é sempre `int` em centavos** (RNF-23). Use `app/dinheiro.py`;
+    nunca `float` nem `REAL` no banco.
+11. **Sistemas externos só em `backend/app/integracoes/`**, e toda chamada passa
+    por `base.chamar_com_tempo_limite` (RNF-19). Os mocks aceitam um
+    `transporte` para os testes simularem falhas. Tempo limite padrão: 3 s,
+    configurável em `BURGUERJA_TIMEOUT_INTEGRACOES`.
+12. **Testes usam a fixture `client`** (`tests/conftest.py`), que cria um banco
+    temporário via `BURGUERJA_DB`; nunca o `burguerja.db` real.
 
 ## Crescimento previsto (sugestão, não obrigatório)
 
-Quando o código crescer, a ideia é separar por funcionalidade da ERS:
-`backend/app/routers/<funcionalidade>.py` (ex.: `carrinho.py`, `pedidos.py`) e
+No back-end, os routers já estão separados (regra 9); os próximos são, por
+exemplo, `auth.py`, `unidades.py` e `carrinho.py`, e a lógica de cálculo de
+preços deve ir para `backend/app/servicos/`. No front-end, a ideia é
 `frontend/src/pages/<Tela>.tsx` + `frontend/src/components/`. Ao fazer isso,
 atualize a árvore e as regras acima.

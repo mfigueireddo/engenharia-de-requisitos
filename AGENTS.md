@@ -143,9 +143,10 @@ No PR da primeira funcionalidade real da ERS (que já exercite banco → API →
 front-end), remova:
 
 - a tabela `recado` em `backend/app/schema.sql`;
-- as classes `RecadoEntrada`/`Recado` e as rotas `/api/recados` em `backend/app/main.py`
-  (mantenha `/api/health`);
-- o teste de recados em `backend/tests/test_api.py` (substitua por testes reais);
+- o arquivo `backend/app/routers/recados.py` (classes `RecadoEntrada`/`Recado` e rotas
+  `/api/recados`) e o `include_router(recados.router)` em `backend/app/main.py`
+  (mantenha `/api/health`, em `routers/saude.py`);
+- o arquivo `backend/tests/test_api.py` (testes de recados; substitua por testes reais);
 - `Recado`, `listarRecados` e `criarRecado` em `frontend/src/api.ts`;
 - a página de teste em `frontend/src/App.tsx` e os estilos que só ela usa;
 - a regra 7 de `ESTRUTURA.md`, este item 7 e o lembrete no topo deste arquivo.
