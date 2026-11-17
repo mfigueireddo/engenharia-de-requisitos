@@ -204,6 +204,19 @@ no servidor** (RNF-14) — o back-end ignora preços vindos do cliente.
 
 ---
 
+### Decisões do grupo (2026-11-17)
+
+| # | Decisão |
+|---|---|
+| Q1 | **A ERS não será alterada.** Cadastro, login, unidades, consulta ao cardápio, UC27 e esvaziar carrinho entram como **infraestrutura mínima**, sem inventar regras além das já escritas na ERS. Cada uma deve ser marcada no código/testes como "infra mínima — sem UC na ERS". |
+| Q2 | **Sim:** unidades e cardápio ficam no banco do BurguerJá como cópia (cache) do que vem do SGL. |
+| Q3 | **Sim, ignorar no UC29:** cupom e pontos na sacola, horário de funcionamento e escolhas dentro do combo. Combo = lista fixa de componentes (RF-11). |
+| Q4 | Mesma linha do Q3 (ignorados: cupom/pontos na sacola, horário, escolhas no combo). |
+| Q5 | Idem: horário de funcionamento fora do escopo. |
+| Q6 | Sem objeção à recomendação: **token opaco guardado na tabela `sessao`**. |
+| Q7 | Sem objeção à proposta: "Esqueci minha senha" fica **fora do escopo**. |
+| Q8 | Resposta: "pedir o endereço do cliente também" — **interpretação a confirmar** (ver registro da sessão). |
+
 ## 8. Proposta de divisão em PRs (back-end)
 
 1. **Fundação** — routers, fixture de testes, utilitário de dinheiro em centavos, mock do SGL vazio.

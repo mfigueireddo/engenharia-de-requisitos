@@ -75,6 +75,30 @@ Nenhum código alterado.
 **Arquivos alterados:** `docs/planejamento/backend-base-carrinho.md` (novo),
 `ESTRUTURA.md` (pasta `docs/planejamento/`), este registro
 
+**Decisão humana:** aceito — o humano respondeu às perguntas na interação 3.
+
+### 3
+
+**Prompt (literal):**
+
+```text
+1. nao vamos mudar nada na ers. deixamos do jeito atual e seguimos com o resto como infra minima
+2. sim
+3. sim
+4. pedir o endereco do cliente tb
+```
+
+**Saída (resumo):** Decisões registradas na seção 7 de
+`docs/planejamento/backend-base-carrinho.md`: ERS não muda; cadastro, login,
+unidades, cardápio, UC27 e esvaziar carrinho entram como infraestrutura mínima;
+cardápio e unidades guardados como cópia do SGL; cupom/pontos na sacola, horário
+de funcionamento e escolhas de combo ignorados; Q6 (token opaco) e Q7 (sem
+"esqueci a senha") assumidos pelas recomendações, já que o humano não se opôs.
+A resposta 4 ficou ambígua (pedir o endereço no cadastro? pedir as coordenadas?)
+— a IA pediu esclarecimento em vez de supor.
+
+**Arquivos alterados:** `docs/planejamento/backend-base-carrinho.md`, este registro
+
 **Decisão humana:** <pendente>
 
 ## Resultado
