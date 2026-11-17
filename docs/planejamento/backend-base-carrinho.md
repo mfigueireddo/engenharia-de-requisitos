@@ -215,7 +215,7 @@ no servidor** (RNF-14) — o back-end ignora preços vindos do cliente.
 | Q5 | Idem: horário de funcionamento fora do escopo. |
 | Q6 | Sem objeção à recomendação: **token opaco guardado na tabela `sessao`**. |
 | Q7 | Sem objeção à proposta: "Esqueci minha senha" fica **fora do escopo**. |
-| Q8 | Resposta: "pedir o endereço do cliente também" — **interpretação a confirmar** (ver registro da sessão). |
+| Q8 | **Geocodificação simulada (opção c):** o formulário de endereço continua igual ao UC33; um serviço mock (`app/integracoes/geocodificacao.py`, como o do SGL) converte o CEP em latitude/longitude a partir de uma tabela fixa de CEPs de exemplo. CEP desconhecido → endereço não pode ser usado para entrega. Só é necessário no UC28 (RF-06). |
 
 ## 8. Proposta de divisão em PRs (back-end)
 

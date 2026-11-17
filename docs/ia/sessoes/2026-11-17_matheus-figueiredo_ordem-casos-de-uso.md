@@ -99,6 +99,22 @@ A resposta 4 ficou ambígua (pedir o endereço no cadastro? pedir as coordenadas
 
 **Arquivos alterados:** `docs/planejamento/backend-base-carrinho.md`, este registro
 
+**Decisão humana:** aceito — o humano esclareceu o item 4 na interação 4.
+
+### 4
+
+**Prompt (literal):**
+
+```text
+c
+```
+
+**Saída (resumo):** Escolhida a opção (c) para o RF-06: geocodificação simulada
+(CEP → latitude/longitude por tabela fixa, mock como o do SGL), sem mudar o
+formulário do UC33. Registrado como Q8 em `docs/planejamento/backend-base-carrinho.md`.
+
+**Arquivos alterados:** `docs/planejamento/backend-base-carrinho.md`, este registro
+
 **Decisão humana:** <pendente>
 
 ## Resultado
