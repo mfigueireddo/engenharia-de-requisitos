@@ -115,6 +115,25 @@ formulário do UC33. Registrado como Q8 em `docs/planejamento/backend-base-carri
 
 **Arquivos alterados:** `docs/planejamento/backend-base-carrinho.md`, este registro
 
+**Decisão humana:** aceito.
+
+### 5
+
+**Prompt (literal):**
+
+```text
+revise quais serao nossos proximos passos
+```
+
+**Saída (resumo):** Seção 8 de `docs/planejamento/backend-base-carrinho.md`
+reescrita como plano de próximos passos: passo 0 (PR desta documentação),
+1 fundação, 2 autenticação, 3 unidades e cardápio (unidade já com campos do
+UC28), 4 carrinho (UC27 + UC29); 2 e 3 em paralelo; UC33 pode começar após o 2;
+remoção do esboço provisório fica para o primeiro PR de front-end; critério de
+pronto por passo.
+
+**Arquivos alterados:** `docs/planejamento/backend-base-carrinho.md`, este registro
+
 **Decisão humana:** <pendente>
 
 ## Resultado

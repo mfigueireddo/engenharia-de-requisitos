@@ -217,11 +217,27 @@ no servidor** (RNF-14) — o back-end ignora preços vindos do cliente.
 | Q7 | Sem objeção à proposta: "Esqueci minha senha" fica **fora do escopo**. |
 | Q8 | **Geocodificação simulada (opção c):** o formulário de endereço continua igual ao UC33; um serviço mock (`app/integracoes/geocodificacao.py`, como o do SGL) converte o CEP em latitude/longitude a partir de uma tabela fixa de CEPs de exemplo. CEP desconhecido → endereço não pode ser usado para entrega. Só é necessário no UC28 (RF-06). |
 
-## 8. Proposta de divisão em PRs (back-end)
+## 8. Próximos passos (revisado em 2026-11-17)
 
-1. **Fundação** — routers, fixture de testes, utilitário de dinheiro em centavos, mock do SGL vazio.
-2. **Autenticação** — `cliente`, `sessao`, cadastro/login/logout, `cliente_atual()` (RNF-09, RNF-10, RNF-13).
-3. **Unidades e cardápio** — `unidade`, `produto`, `combo_componente`, sincronização com o mock do SGL, rotas públicas (RNF-03, RNF-19, RF-10, RF-11).
-4. **Carrinho** — `carrinho`, `pedido` (esqueleto), `item` com XOR, UC27 + UC29 (RF-08 a RF-13, RN-03).
+Cada passo é **um branch `<autor>/<tema>` a partir da `main` atualizada e um PR**
+revisado por outro integrante (AGENTS.md §6). Antes de cada PR:
+`cd backend && python -m pytest`.
 
-Os PRs 2 e 3 são independentes e podem ser feitos em paralelo.
+| Passo | Branch sugerido | Entrega | Requisitos | Depende de |
+|---|---|---|---|---|
+| 0 | (este branch) | PR só de documentação: este levantamento + registro da sessão | — | — |
+| 1 | `<autor>/backend-fundacao` | `app/routers/`, fixture pytest com banco temporário, utilitário de centavos, esqueleto dos mocks `integracoes/sgl.py` e `integracoes/geocodificacao.py` com timeout | RNF-19, RNF-23 | 0 |
+| 2 | `<autor>/autenticacao` | `cliente`, `sessao`; cadastro, login, logout, `/clientes/me`; bcrypt; bloqueio após 5 erros; dependência `cliente_atual()` | RNF-09, RNF-10, RNF-13, RNF-25, RN-01 | 1 |
+| 3 | `<autor>/unidades-cardapio` | `unidade` (já com lat/long, raio, fator de taxa, drive-thru), `produto`, `combo_componente`; carga do mock do SGL; rotas públicas; `cardapio_atualizado_em` | RF-10, RF-11, RNF-03, RNF-19 | 1 |
+| 4 | `<autor>/carrinho-backend` | `carrinho`, `pedido` (esqueleto), `item` com CHECK XOR; UC27 (adicionar) + UC29 (listar/recalcular, alterar, remover, esvaziar) | RF-02, RF-08 a RF-13, RN-02, RN-03, RNF-14 | 2 e 3 |
+
+**Paralelismo:** 2 e 3 podem ser feitos por pessoas diferentes ao mesmo tempo.
+Depois do passo 2, o **UC33 (endereços)** também pode começar em paralelo (só depende do cliente logado).
+
+**Depois do back-end do UC29** (fora deste levantamento):
+- Front-end de login + cardápio + sacola → esse PR é o que **remove o esboço provisório** (`recado`, AGENTS.md §7), pois é o primeiro a ir do banco ao front-end.
+- UC33 → UC28 (usa a geocodificação simulada, RF-06) → UC30 → UC31 → UC32.
+
+**Critério de pronto de cada passo:** todos os IDs da coluna "Requisitos" com teste
+citando o ID no nome/descrição; `ESTRUTURA.md` atualizado com pastas novas;
+registro de IA da sessão commitado junto.
