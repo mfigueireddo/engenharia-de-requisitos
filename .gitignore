@@ -10,6 +10,7 @@ __pycache__/
 # Node
 node_modules/
 dist/
+*.tsbuildinfo
 
 # Sistema / editores
 .DS_Store
