@@ -9,7 +9,7 @@ este arquivo; regras novas entram **aqui**, não lá.
 **BurguerJá** — aplicativo web de pedidos para uma rede de fast-food, projeto da
 disciplina de Engenharia de Requisitos (PUC-Rio, 2026.2). A disciplina avalia a
 implementação da ERS **com uso de IA**, e o uso da IA precisa ser documentado
-(seção 4 deste arquivo).
+(seção 5 deste arquivo).
 
 ## 2. Fonte de verdade: a ERS
 
@@ -40,12 +40,21 @@ implementação da ERS **com uso de IA**, e o uso da IA precisa ser documentado
   Gateway de Pagamento e SGL são sistemas externos (simule-os com mocks/stubs).
 - Nunca commitar segredos (chaves, tokens, senhas, `.env`).
 
-## 4. Registro obrigatório do uso de IA
+## 4. Estrutura de pastas e arquivos
+
+- Siga a estrutura e as regras de organização de [`ESTRUTURA.md`](ESTRUTURA.md).
+  Antes de criar arquivos, leia esse documento.
+- Sempre que surgir uma regra nova (de organização, de código ou de processo),
+  ou quando você criar/mover/remover pastas ou arquivos importantes,
+  **registre em `ESTRUTURA.md` no mesmo commit**.
+- Como rodar o projeto: [`README.md`](README.md). Mantenha-o curto.
+
+## 5. Registro obrigatório do uso de IA
 
 Toda sessão de trabalho com IA gera **um arquivo de registro**. O professor
 avalia esses registros, então eles fazem parte da entrega.
 
-### 4.1 Onde e com que nome
+### 5.1 Onde e com que nome
 
 ```
 docs/ia/sessoes/AAAA-MM-DD_<autor>_<tema>.md
@@ -55,7 +64,7 @@ docs/ia/sessoes/AAAA-MM-DD_<autor>_<tema>.md
 - `<tema>` = 2 a 4 palavras em kebab-case (ex.: `carrinho-backend`).
 - Modelo do arquivo: `docs/ia/TEMPLATE_SESSAO.md`. Siga **todas** as seções.
 
-### 4.2 Protocolo
+### 5.2 Protocolo
 
 1. **Início da sessão** (primeira resposta): crie o arquivo de registro a partir
    do template. Preencha os metadados. Pergunte ao humano o objetivo e os
@@ -72,11 +81,11 @@ docs/ia/sessoes/AAAA-MM-DD_<autor>_<tema>.md
 3. **Fim da sessão** (quando o humano disser "encerrar sessão", pedir o commit
    final, ou se despedir): complete "Resultado" e "Reflexão", adicione uma linha
    no fim de `docs/ia/INDICE.md` e **commite o registro junto com o código**
-   (e o transcript bruto, se existir — ver 4.4).
+   (e o transcript bruto, se existir — ver 5.4).
 4. Uma sessão = um arquivo. Se o mesmo humano retomar outro dia, crie outro
    arquivo e cite o anterior em "Sessão anterior".
 
-### 4.3 Modelo e ferramenta
+### 5.3 Modelo e ferramenta
 
 - Informe o **identificador exato do modelo** (ex.: `claude-opus-5-5`,
   `gpt-5-codex`), não só o nome comercial. Se você não souber com certeza qual
@@ -85,7 +94,7 @@ docs/ia/sessoes/AAAA-MM-DD_<autor>_<tema>.md
   (ex.: `claude --version`, `codex --version`, versão do Cursor).
 - Se o modelo mudar durante a sessão, registre na interação em que mudou.
 
-### 4.4 Transcript bruto
+### 5.4 Transcript bruto
 
 - **Claude Code:** o hook em `.claude/settings.json` salva o transcript em
   `docs/ia/transcripts/` automaticamente (com e-mails e tokens mascarados).
@@ -96,7 +105,7 @@ docs/ia/sessoes/AAAA-MM-DD_<autor>_<tema>.md
   link no campo "Transcript" do registro. Revise antes de commitar: nada de
   segredos ou dados pessoais.
 
-### 4.5 Ferramentas sem acesso ao repositório (chat web, autocomplete)
+### 5.5 Ferramentas sem acesso ao repositório (chat web, autocomplete)
 
 O **humano** preenche o registro copiando `docs/ia/TEMPLATE_SESSAO.md`. Para
 autocomplete (Copilot inline etc.), um registro por dia de trabalho basta,

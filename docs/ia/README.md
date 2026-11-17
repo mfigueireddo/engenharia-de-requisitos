@@ -2,7 +2,7 @@
 
 A implementação do BurguerJá é feita com apoio de IA, e todo uso é documentado
 aqui. As regras que os agentes seguem estão em [`AGENTS.md`](../../AGENTS.md)
-(seção 4).
+(seção 5).
 
 ## O que tem aqui
 
@@ -26,7 +26,7 @@ aqui. As regras que os agentes seguem estão em [`AGENTS.md`](../../AGENTS.md)
 
 1. Confira seu nome no git: `git config user.name` (ele vira o `<autor>` nos nomes de arquivo).
 2. Ao abrir uma sessão com um agente, ele cria o registro sozinho. Se não criar, peça:
-   *"Siga a seção 4 do AGENTS.md e crie o registro desta sessão."*
+   *"Siga a seção 5 do AGENTS.md e crie o registro desta sessão."*
 3. Para encerrar, diga **"encerrar sessão"**: o agente fecha o registro, atualiza o índice e commita.
 4. **Gemini CLI:** ele lê `GEMINI.md` por padrão; configure `"contextFileName": "AGENTS.md"`
    em `.gemini/settings.json` ou peça para ele ler o `AGENTS.md` no começo.
