@@ -6,3 +6,4 @@ Acrescente uma linha **no fim** da tabela ao encerrar cada sessão.
 |---|---|---|---|---|---|---|
 | 2026-11-17 | matheus-figueiredo | Claude Code 2.1.326 (web) | claude-opus-5-5 | Estrutura de registro do uso de IA (AGENTS.md, CLAUDE.md, hook) | — | [registro](sessoes/2026-11-17_matheus-figueiredo_setup-registro-ia.md) |
 | 2026-11-17 | matheus-figueiredo | Claude Code 2.1.x (web) | claude-opus-5-5 | Estrutura base: SQLite + FastAPI + React | 2.5, RNF-20 | [registro](sessoes/2026-11-17_matheus-figueiredo_estrutura-base.md) |
+| 2026-11-17 | matheus-figueiredo | Claude Code 2.1.x (web) | claude-opus-5-5 | Fluxo de branch + PR e lembrete do esboço | — | [registro](sessoes/2026-11-17_matheus-figueiredo_fluxo-branch-pr.md) |

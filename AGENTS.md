@@ -4,6 +4,10 @@ Este arquivo vale para **qualquer** agente de IA que trabalhe neste repositório
 (Claude Code, Codex, Cursor, Copilot, Gemini CLI etc.). O `CLAUDE.md` importa
 este arquivo; regras novas entram **aqui**, não lá.
 
+> ⚠️ **Lembrete — esboço provisório:** a tabela `recado`, as rotas `/api/recados`
+> e a página atual do front-end são só um teste de integração. Quem entregar a
+> **primeira funcionalidade real** da ERS deve removê-los no mesmo PR (ver seção 7).
+
 ## 1. O projeto
 
 **BurguerJá** — aplicativo web de pedidos para uma rede de fast-food, projeto da
@@ -80,8 +84,8 @@ docs/ia/sessoes/AAAA-MM-DD_<autor>_<tema>.md
      Se o humano não disser, pergunte no fim da sessão.
 3. **Fim da sessão** (quando o humano disser "encerrar sessão", pedir o commit
    final, ou se despedir): complete "Resultado" e "Reflexão", adicione uma linha
-   no fim de `docs/ia/INDICE.md` e **commite o registro junto com o código**
-   (e o transcript bruto, se existir — ver 5.4).
+   no fim de `docs/ia/INDICE.md` e **commite o registro junto com o código**,
+   no branch da tarefa (e o transcript bruto, se existir — ver 5.4).
 4. Uma sessão = um arquivo. Se o mesmo humano retomar outro dia, crie outro
    arquivo e cite o anterior em "Sessão anterior".
 
@@ -110,3 +114,40 @@ docs/ia/sessoes/AAAA-MM-DD_<autor>_<tema>.md
 O **humano** preenche o registro copiando `docs/ia/TEMPLATE_SESSAO.md`. Para
 autocomplete (Copilot inline etc.), um registro por dia de trabalho basta,
 descrevendo onde foi usado e o que foi aceito.
+
+## 6. Branches e pull requests
+
+Não existe CI: a revisão humana e os testes locais são a única barreira antes da `main`.
+
+- **Nunca commite nem dê push direto na `main`.** Toda modificação é feita num
+  branch separado e entra na `main` por pull request.
+- **Um branch por tarefa**, criado a partir da `main` atualizada, com o nome
+  `<autor>/<tema>` (`<autor>` = `bash scripts/ia/autor.sh`; `<tema>` em kebab-case).
+  Ex.: `joao-marcelo-onofre/carrinho-backend`.
+- **Antes de abrir o PR**, rode localmente e informe o resultado no PR:
+  `cd backend && python -m pytest` e `cd frontend && npm run build`.
+- **Descrição do PR:** preencha o modelo de `.github/pull_request_template.md`
+  (o GitHub o carrega sozinho), com os IDs da ERS e os links para os registros
+  de IA da tarefa.
+- **Pelo menos um outro integrante revisa e aprova** antes do merge. Quem abriu
+  o PR não aprova o próprio.
+- Antes do merge, atualize o branch com a `main` (`git merge main`) e rode os
+  testes de novo se houve mudanças.
+- Agentes de IA: crie o branch e faça commits nele; **abra o PR só se o humano
+  pedir**, e nunca faça merge.
+
+## 7. Esboço provisório a remover
+
+O esqueleto atual tem um exemplo de integração que **não faz parte do produto**.
+No PR da primeira funcionalidade real da ERS (que já exercite banco → API →
+front-end), remova:
+
+- a tabela `recado` em `backend/app/schema.sql`;
+- as classes `RecadoEntrada`/`Recado` e as rotas `/api/recados` em `backend/app/main.py`
+  (mantenha `/api/health`);
+- o teste de recados em `backend/tests/test_api.py` (substitua por testes reais);
+- `Recado`, `listarRecados` e `criarRecado` em `frontend/src/api.ts`;
+- a página de teste em `frontend/src/App.tsx` e os estilos que só ela usa;
+- a regra 7 de `ESTRUTURA.md`, este item 7 e o lembrete no topo deste arquivo.
+
+Todos esses trechos estão marcados no código com `ESBOÇO-PROVISÓRIO`.

@@ -1,4 +1,5 @@
--- Esquema do banco. Tabela "recado" é só um teste de integração:
+-- Esquema do banco.
+-- ESBOÇO-PROVISÓRIO: a tabela "recado" é só um teste de integração (AGENTS.md, seção 7):
 -- remova quando as tabelas reais da ERS forem criadas.
 CREATE TABLE IF NOT EXISTS recado (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,

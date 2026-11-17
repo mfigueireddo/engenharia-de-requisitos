@@ -1,4 +1,4 @@
-// Página de teste de integração front-end ↔ API ↔ banco.
+// ESBOÇO-PROVISÓRIO: página de teste de integração front-end ↔ API ↔ banco (AGENTS.md, seção 7).
 // Remover quando as telas reais (ERS, seção 3.1) começarem a ser implementadas.
 import { FormEvent, useEffect, useState } from "react";
 import { api, Recado } from "./api";

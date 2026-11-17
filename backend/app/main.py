@@ -22,7 +22,7 @@ def health():
     return {"status": "ok"}
 
 
-# --- Exemplo de integração (remover quando o projeto começar de fato) ---
+# --- ESBOÇO-PROVISÓRIO: exemplo de integração; remover na 1ª funcionalidade real (AGENTS.md, seção 7) ---
 
 class RecadoEntrada(BaseModel):
     texto: str = Field(min_length=1, max_length=200)

@@ -1,5 +1,6 @@
 // Cliente da API REST do back-end. Toda comunicação com dados passa por aqui.
 
+// ESBOÇO-PROVISÓRIO: Recado e as funções de recados saem na 1ª funcionalidade real (AGENTS.md, seção 7).
 export type Recado = { id: number; texto: string; criado_em: string };
 
 async function requisitar<T>(caminho: string, init?: RequestInit): Promise<T> {

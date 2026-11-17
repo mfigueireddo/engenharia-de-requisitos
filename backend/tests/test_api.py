@@ -1,3 +1,4 @@
+# ESBOÇO-PROVISÓRIO: teste de recados; substituir por testes reais (AGENTS.md, seção 7).
 from fastapi.testclient import TestClient
 
 

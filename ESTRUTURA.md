@@ -13,6 +13,8 @@ entra aqui no mesmo commit.
 ├── ESTRUTURA.md              Este arquivo
 ├── README.md                 Como rodar (mínimo)
 ├── srs-pt.docx               ERS original (fonte de verdade)
+├── .github/
+│   └── pull_request_template.md  Modelo de descrição de PR
 ├── backend/                  API — Python + FastAPI + SQLite
 │   ├── requirements.txt      Dependências Python (versões fixas)
 │   ├── app/
@@ -49,7 +51,10 @@ entra aqui no mesmo commit.
 5. **Todo endpoint novo ganha teste** em `backend/tests/`.
 6. **Arquivos gerados não entram no git:** `.venv/`, `node_modules/`, `dist/`, `*.db`.
 7. **A tabela `recado`, as rotas `/api/recados` e a página de `App.tsx` são só
-   um teste de integração.** Remova-os quando as funcionalidades reais começarem.
+   um teste de integração** (marcados com `ESBOÇO-PROVISÓRIO`). Remova-os no PR
+   da primeira funcionalidade real; a lista completa está no `AGENTS.md`, seção 7.
+8. **Nada vai direto para a `main`.** Cada tarefa num branch `<autor>/<tema>` e
+   merge por pull request revisado por outro integrante (`AGENTS.md`, seção 6).
 
 ## Crescimento previsto (sugestão, não obrigatório)
 
