@@ -6,13 +6,13 @@
 |---|---|
 | Autor (humano) | Matheus Figueiredo (no container de nuvem o `git config user.name` era "Claude") |
 | Data | 2026-11-17 |
-| Duração aproximada | <preencher no fim> |
+| Duração aproximada | ~1h |
 | Ferramenta (harness) e versão | Claude Code 2.1.326 (sessão na nuvem, claude.ai/code) |
 | Modelo (ID exato) | claude-opus-5-5 |
 | Modo de uso | agente |
 | Branch | claude/practical-cray-xmz3kd |
-| Commits | <preencher no fim> |
-| Transcript | <preencher no fim> |
+| Commits | 742aed0, ddfc2fd, 4cd010f, eb36faf, bbf163a + commit final |
+| Transcript | `docs/ia/transcripts/2026-11-17_claude_86fc6792-9474-5eff-9e62-d21db14c1d30.jsonl` |
 | Sessão anterior | — |
 
 ## Objetivo
@@ -134,15 +134,46 @@ pronto por passo.
 
 **Arquivos alterados:** `docs/planejamento/backend-base-carrinho.md`, este registro
 
+**Decisão humana:** aceito — o humano pediu para abrir o PR do passo 0.
+
+### 6
+
+**Prompt (literal):**
+
+```text
+abre o pr do passo 0 e já dá merge com a main
+[Request interrupted by user]
+antes, faz um arquivo .md para apresentar o que foi feito no passo 1 pro professor
+máximo de uma página, tudo em bullet poinst
+```
+
+**Saída (resumo):** Interpretado "passo 1" como o trabalho desta sessão (o passo 1
+do plano, fundação, ainda não foi feito). Criado
+`docs/apresentacoes/2026-11-17_planejamento-carrinho.md` (uma página, só
+tópicos, no formato da apresentação anterior). Registro finalizado, linha no
+`INDICE.md`, transcript salvo. PR do passo 0 aberto. Merge **não** feito sem
+confirmação: AGENTS.md §6 diz que agentes nunca fazem merge e que outro
+integrante precisa aprovar — conflito levado ao humano.
+
+**Arquivos alterados:** `docs/apresentacoes/2026-11-17_planejamento-carrinho.md`,
+`docs/ia/INDICE.md`, `docs/ia/transcripts/`, este registro
+
 **Decisão humana:** <pendente>
 
 ## Resultado
 
-- **Entregue:** <preencher no fim>
-- **Testes:** não se aplica (análise)
-- **Problemas da IA:** <preencher no fim>
-- **Pendências:** decidir como tratar UC27/cadastro/cardápio, que não estão detalhados na ERS.
+- **Entregue:** escolha do UC29 como primeiro caso de uso; levantamento do back-end
+  (`docs/planejamento/backend-base-carrinho.md`) com dependências ocultas, modelo de
+  dados, rotas, regras→testes, decisões do grupo e plano de 4 PRs; resumo para o
+  professor (`docs/apresentacoes/2026-11-17_planejamento-carrinho.md`).
+- **Testes:** não se aplica (só documentação).
+- **Problemas da IA:** a primeira análise não tinha visto as dependências ocultas
+  (cadastro, unidades, cardápio, UC27) — o humano pediu para procurar e elas foram
+  encontradas; a resposta "4" do humano foi ambígua e precisou de esclarecimento.
+- **Pendências:** merge do PR do passo 0 (aguarda revisão/decisão); passos 1 a 4.
 
 ## Reflexão
 
-<preencher no fim>
+Ler a ERS inteira (não só a Seção 4) e os wireframes revelou dependências e
+conflitos que a lista de casos de uso escondia. Perguntar com opções concretas
+resolveu ambiguidades rápido. Faria o levantamento completo já na primeira resposta.
