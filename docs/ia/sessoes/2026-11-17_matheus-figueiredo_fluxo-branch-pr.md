@@ -85,9 +85,31 @@ transcript atualizado e commit + push na `main`.
 
 **Decisão humana:** aceito.
 
+### 4
+
+**Prompt (literal):**
+
+```text
+na real, vamos fazer algo a mais
+
+quero preparar uma mini apresentação do que fiz nessa sessao pro professor
+
+gera um .md de UMA página com os key points do que fizemos
+
+nao coloca mt texto, quero tudo bem resumido e de preferencia separado por topicos e bullet points
+```
+
+**Saída (resumo):** criado `docs/apresentacoes/2026-11-17_setup-projeto-com-ia.md`
+(uma página: objetivo, 4 tópicos do que foi feito, uso de IA, próximos passos);
+`ESTRUTURA.md` atualizado com a pasta `docs/apresentacoes/`.
+
+**Arquivos alterados:** o resumo acima, `ESTRUTURA.md`, este registro, transcript.
+
+**Decisão humana:** pendente de revisão.
+
 ## Resultado
 
-- **Entregue:** regras de branch/PR, modelo de PR, lembrete do esboço em 3 níveis (AGENTS.md, checklist do PR, comentários no código).
+- **Entregue:** resumo de uma página para o professor; regras de branch/PR, modelo de PR, lembrete do esboço em 3 níveis (AGENTS.md, checklist do PR, comentários no código).
 - **Testes:** `pytest` e `npm run build` passaram.
 - **Problemas da IA:** nenhum.
 - **Pendências:** opcionalmente proteger a `main` no GitHub (Settings → Branches) para exigir PR.
