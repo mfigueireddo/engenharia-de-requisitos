@@ -3,8 +3,21 @@
 # para docs/ia/transcripts/, mascarando e-mails e tokens. Roda após cada
 # resposta, então o arquivo está sempre atualizado; quem commita é o agente
 # (ou a pessoa) junto com o registro da sessão.
+# Uso manual (ex.: antes do commit final numa sessão na nuvem):
+#   bash .claude/hooks/salvar-transcript.sh --manual
 set -u
-entrada=$(cat)
+if [ "${1:-}" = "--manual" ]; then
+  sid="${CLAUDE_CODE_SESSION_ID:-}"
+  if [ -n "$sid" ]; then
+    arq=$(find "$HOME/.claude/projects" -name "$sid.jsonl" 2>/dev/null | head -1)
+  else
+    arq=$(ls -t "$HOME"/.claude/projects/*/*.jsonl 2>/dev/null | head -1)
+    sid=$(basename "$arq" .jsonl)
+  fi
+  entrada="{\"session_id\":\"$sid\",\"transcript_path\":\"$arq\",\"hook_event_name\":\"Manual\"}"
+else
+  entrada=$(cat)
+fi
 
 campo() {
   if command -v jq >/dev/null 2>&1; then
@@ -13,6 +26,13 @@ campo() {
     printf '%s' "$entrada" | sed -nE "s/.*\"$1\" *: *\"([^\"]*)\".*/\1/p" | sed 's/\\\\/\\/g'
   fi
 }
+
+# Na nuvem (CLAUDE_CODE_REMOTE=true) o ambiente exige a árvore limpa ao fim de
+# cada resposta; reescrever o transcript no Stop criaria um loop. Lá, o
+# transcript é salvo no SessionEnd ou manualmente (--manual) antes do commit.
+if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ] && [ "$(campo hook_event_name)" = "Stop" ]; then
+  exit 0
+fi
 
 sessao=$(campo session_id)
 origem=$(campo transcript_path)

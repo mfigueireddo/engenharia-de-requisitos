@@ -10,5 +10,9 @@
   fim da sessão (`SessionEnd`), mantendo `docs/ia/transcripts/<data>_<autor>_<session_id>.jsonl`
   atualizado. No commit final da sessão, inclua esse arquivo
   (`git add docs/ia/transcripts/`). Cite o nome dele no campo "Transcript" do registro.
+- **Sessão na nuvem (claude.ai/code, `CLAUDE_CODE_REMOTE=true`):** o hook não
+  roda no `Stop`, para não deixar a árvore suja a cada resposta. Antes do commit
+  final, rode `bash .claude/hooks/salvar-transcript.sh --manual` e commite o
+  transcript junto com o registro.
 - Se a sessão for compactada, consulte o próprio arquivo de registro (e não a
   memória) para saber o que já foi registrado.
