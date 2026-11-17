@@ -199,6 +199,23 @@ anterior (PRs empilhados, já que nenhum PR foi mergeado na `main`).
 
 **Decisão humana:** <pendente>
 
+### 9 (evento automático, sem prompt humano)
+
+**Gatilho:** checagem agendada pela própria IA na interação 8 (18:38 UTC).
+
+**Saída (resumo):** A sessão do passo 1 (`session_01RBrzSdWNGSMGCAZyEKsnb1`)
+terminou o código: branch `matheus-figueiredo/backend-fundacao` (commit
+`f992cd7`), 55 testes passando — conferido localmente por esta sessão
+(`55 passed`). O registro dela ainda espera a avaliação humana e o encerramento.
+Criada a sessão do passo 2 — autenticação (`session_01RBrzScSpf6nrtSMK5WWZrh`),
+partindo de `matheus-figueiredo/backend-fundacao`, com escopo: `cliente`,
+`sessao`, cadastro/login/logout/me, bcrypt (RNF-09), bloqueio (RNF-10),
+`cliente_atual()` (RNF-13). Nova checagem agendada para ~20 min.
+
+**Arquivos alterados:** este registro
+
+**Decisão humana:** <pendente>
+
 ## Resultado
 
 - **Entregue:** escolha do UC29 como primeiro caso de uso; levantamento do back-end
