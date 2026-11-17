@@ -47,6 +47,34 @@ como tratar.
 
 **Arquivos alterados:** este registro
 
+**Decisão humana:** aceito (implícito) — o humano seguiu com o UC29 como tarefa e pediu o levantamento do back-end; a pergunta sobre UC27/cadastro ficou em aberto.
+
+### 2
+
+**Prompt (literal):**
+
+```text
+pode ser que tenha mais alguma dependencia de use case que nao tenhamos documentado
+
+quero que voce faca um levantamento de tudo que precisamos estruturado (apenas em backend por enquanto) para conseguirmos fazer essa tarefa
+```
+
+**Saída (resumo):** Leitura das Seções 2–7 e Apêndices da ERS, dos wireframes
+01–06 e do back-end atual. Criado `docs/planejamento/backend-base-carrinho.md`
+com: 10 dependências ocultas do UC29 (cadastro, login, autorização, unidades,
+cardápio do SGL e cache, UC27, esvaziar carrinho, esqueleto de `pedido` para o
+XOR, mock do SGL); modelo de dados proposto (cliente, sessao, unidade, produto,
+combo_componente, carrinho, pedido, item com CHECK XOR, valores em centavos);
+rotas REST; integração SGL com timeout/fallback; tabela regra→teste; 8 perguntas
+ao grupo (Q1–Q8) e divisão em 4 PRs. Divergências encontradas: wireframe 06
+mostra cupom e pontos na sacola (conflita com RN-12/UC30); wireframe 02 mostra
+horário de funcionamento (omisso na ERS); combos com escolhas (wireframe 06) não
+especificados; Seção 3.3 não lista cardápio/unidades como dados do banco.
+Nenhum código alterado.
+
+**Arquivos alterados:** `docs/planejamento/backend-base-carrinho.md` (novo),
+`ESTRUTURA.md` (pasta `docs/planejamento/`), este registro
+
 **Decisão humana:** <pendente>
 
 ## Resultado
