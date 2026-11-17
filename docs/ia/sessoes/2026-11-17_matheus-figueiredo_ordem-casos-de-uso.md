@@ -178,6 +178,25 @@ não abrir PR nem fazer merge sem pedido, e apresentar um plano antes de codar.
 
 **Arquivos alterados:** este registro
 
+**Decisão humana:** aceito.
+
+### 8
+
+**Prompt (literal):**
+
+```text
+fica vendo a sessao do passo 1. quando ela acabar, pode comecar as outras de maneira sequencial
+```
+
+**Saída (resumo):** Verificado o estado da sessão do passo 1: o humano aprovou o
+plano ("tudo aprovado") e ela está escrevendo o código no branch
+`matheus-figueiredo/backend-fundacao`. Agendada uma checagem a cada ~15 min;
+quando o passo 1 terminar, esta sessão cria a do passo 2 (autenticação), depois
+a do 3 (unidades e cardápio) e a do 4 (carrinho), cada uma partindo do branch da
+anterior (PRs empilhados, já que nenhum PR foi mergeado na `main`).
+
+**Arquivos alterados:** este registro
+
 **Decisão humana:** <pendente>
 
 ## Resultado
