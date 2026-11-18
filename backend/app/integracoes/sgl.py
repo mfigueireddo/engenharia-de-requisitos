@@ -1,9 +1,9 @@
 """Cliente do SGL (Sistema de Gestão da Loja), simulado.
 
-O SGL é sistema externo (ERS 2.5, 3.3); o BurguerJá só consulta o cardápio de
-cada unidade. Aqui a "chamada" lê um JSON fixo de exemplo
-(dados_simulados/cardapios_sgl.json). A carga desse cardápio no banco e as
-rotas de cardápio ficam para o passo 3 do plano. No exemplo, o combo não tem
+O SGL é sistema externo (ERS 2.5, 3.3); o BurguerJá consulta a lista de
+unidades e o cardápio de cada uma. Aqui a "chamada" lê JSONs fixos de exemplo
+(dados_simulados/unidades_sgl.json e cardapios_sgl.json). A carga no banco
+fica em app/servicos/cardapio.py. No exemplo, o combo não tem
 preço próprio: vale a soma dos componentes, com o desconto de cada um (RF-11).
 
 Toda chamada tem tempo limite e tratamento de erro (RNF-19). Em caso de falha,
@@ -18,6 +18,7 @@ from .base import IntegracaoIndisponivel, chamar_com_tempo_limite
 
 SISTEMA = "SGL"
 ARQUIVO_SIMULADO = Path(__file__).resolve().parent / "dados_simulados" / "cardapios_sgl.json"
+ARQUIVO_UNIDADES = Path(__file__).resolve().parent / "dados_simulados" / "unidades_sgl.json"
 
 Transporte = Callable[[str], object]
 """Função que faz a chamada ao SGL e devolve a resposta bruta (JSON decodificado)."""
@@ -50,3 +51,22 @@ def obter_cardapio(
     """
     resposta = chamar_com_tempo_limite(SISTEMA, transporte, id_sgl_unidade, tempo_limite=tempo_limite)
     return _validar(resposta)
+
+
+def _transporte_unidades_simulado() -> object:
+    return json.loads(ARQUIVO_UNIDADES.read_text(encoding="utf-8"))
+
+
+def obter_unidades(
+    *,
+    transporte: Callable[[], object] = _transporte_unidades_simulado,
+    tempo_limite: float | None = None,
+) -> list[dict]:
+    """Lista de unidades da rede, como o SGL devolve (infra mínima — sem UC na ERS).
+
+    Mesmas garantias de `obter_cardapio` (RNF-19).
+    """
+    resposta = chamar_com_tempo_limite(SISTEMA, transporte, tempo_limite=tempo_limite)
+    if not isinstance(resposta, list):
+        raise IntegracaoIndisponivel(SISTEMA, "resposta em formato inesperado")
+    return resposta

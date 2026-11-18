@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from . import db
-from .routers import recados, saude
+from .routers import auth, carrinho, enderecos, pedidos, recados, saude, unidades
 
 
 @asynccontextmanager
@@ -20,4 +20,9 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="BurguerJá API", lifespan=lifespan)
 
 app.include_router(saude.router)
+app.include_router(auth.router)
+app.include_router(unidades.router)
+app.include_router(carrinho.router)
+app.include_router(enderecos.router)
+app.include_router(pedidos.router)
 app.include_router(recados.router)  # ESBOÇO-PROVISÓRIO (AGENTS.md, seção 7)
