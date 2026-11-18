@@ -84,7 +84,25 @@ perguntou antes de codar.
 **Prompt (literal):**
 
 ```text
-É somente para serem feitos UC28 e UC29 apenas o resto outra pessoa vai  implementar
+Contexto
+Antes de qualquer alteração, leia a documentação do projeto (README, docs de arquitetura, padrões de código e o backlog/lista de tarefas) para entender como o sistema está organizado: estrutura de pastas, convenções de nomes, camadas, testes e fluxo de trabalho.
+
+Tarefas
+
+Finalizar a C29 – Gerenciar itens do carrinho
+Essa tarefa já foi começada. Veja o que já está pronto e o que falta.
+Termine o que faltar: adicionar, remover e alterar a quantidade de itens, além de recalcular os totais. Ajuste conforme o que estiver especificado na tarefa.
+Garanta que os testes cubram o que foi feito.
+Implementar a C[número] – Adicionar cupom de desconto
+Confirme na documentação ou no backlog se essa é mesmo a tarefa de cupom de desconto. Se não for, me avise antes de começar.
+Implemente aplicar e remover cupom, validar o cupom (existência, validade, regras de uso) e refletir o desconto no total do carrinho.
+Integre com o carrinho da C29.
+
+Regras
+
+Siga os padrões que o projeto já usa (arquitetura, nomes, tratamento de erros, testes, mensagens de commit). Não crie um padrão novo.
+Se algo estiver ambíguo ou faltando na especificação, pergunte antes de supor.
+Ao terminar, me mande um resumo curto com o que foi feito em cada tarefa, os arquivos alterados, como testar e qualquer pendência ou decisão que você tomou.
 ```
 
 **Contexto:** o humano interrompeu a IA no meio da escrita dos testes do cupom.
@@ -132,7 +150,7 @@ e tempo estimado).
   movidos do carrinho para o pedido com preço congelado, notificação).
 - Rotas: `POST /api/pedidos/previa`, `POST /api/pedidos` (exige o total que o
   cliente viu; se mudou → 409, RNF-26) e `GET /api/enderecos`.
-- `tests/test_checkout.py` (22 testes). Ajustou o teste RF-09 do carrinho ao
+- `tests/test_checkout.py` (24 testes). Ajustou o teste RF-09 do carrinho ao
   novo `pedido`. Atualizou `ESTRUTURA.md` (árvore e regras 13–16). Renomeou o
   branch para `henriqueecoa/carrinho-checkout` e este registro para
   `..._carrinho-e-checkout.md`.
@@ -147,7 +165,8 @@ e tempo estimado).
   esvaziar como infra mínima) e finalizar pedido (UC28, sem cupom e sem
   pagamento).
 - **Testes:** `cd backend && python -m pytest` → 124 passed (55 que já existiam
-  + 69 novos: auth 14, cardápio 8, preços 4, carrinho 21, checkout 22).
+  + 69 novos: auth 14, cardápio 8, preços 4, carrinho 21, checkout 24, sendo
+  alguns ajustes de fixtures).
 - **Problemas da IA:** começou a implementar o UC30 (cupom) porque entendeu o
   primeiro prompt assim; o humano corrigiu o escopo para UC28 + UC29 e o código
   do cupom foi apagado (retrabalho).
