@@ -6,12 +6,12 @@
 |---|---|
 | Autor (humano) | matheus-figueiredo |
 | Data | 2026-11-19 |
-| Duração aproximada | (preencher no fim) |
+| Duração aproximada | 1h |
 | Ferramenta (harness) e versão | Claude Code 2.1.328 (web) |
 | Modelo (ID exato) | claude-opus-5-5 |
 | Modo de uso | agente |
 | Branch | claude/awesome-turing-3m0yie |
-| Commits | (preenchidos no fim) |
+| Commits | 367b19a (registro parcial), 457728e (refatoração), commit de encerramento deste registro |
 | Transcript | docs/ia/transcripts/2026-11-19_claude_dcce4748-9e5c-5235-84e3-4589104d6039.jsonl |
 | Sessão anterior | — |
 
@@ -105,4 +105,61 @@ Feito em seguida:
 `frontend/src/api.ts`, `frontend/src/paginas/DetalheItem.tsx`,
 `docs/srs/Projeto_Relacional_de_Tabelas.drawio`, `ESTRUTURA.md`, `README.md`, este registro.
 
-**Decisão humana:** (pendente)
+**Decisão humana:** aceito — o humano pediu para abrir o PR sem pedir ajustes (interação 3).
+
+### 3
+
+**Prompt (literal):**
+
+```text
+abre o pr
+```
+
+**Saída (resumo):** a IA leu o modelo de PR (`.github/pull_request_template.md`)
+e conferiu que a `main` não tinha commits novos. Antes de criar o PR, chegou a
+interação 4.
+
+**Arquivos alterados:** nenhum.
+
+**Decisão humana:** aceito.
+
+### 4
+
+**Prompt (literal):**
+
+```text
+fecha a sessao ante
+```
+
+**Saída (resumo):** a IA fechou este registro (Resultado, Reflexão, linha no
+`docs/ia/INDICE.md`), salvou o transcript, fez o commit e o push. Depois abriu
+o PR para a `main` com o modelo do repositório preenchido.
+
+**Arquivos alterados:** este registro, `docs/ia/INDICE.md`, transcript.
+
+**Decisão humana:** aceito.
+
+## Resultado
+
+- **Entregue:** esquema do banco alinhado ao projeto relacional do grupo
+  (cardápio com herança Table-Per-Type, endereços em tabelas próprias,
+  `item_pedido`, `pedido` com `modalidade`/`previsao_entrega`, triggers do
+  diagrama); diagrama incluído em `docs/srs/` (Ap. B.3 da ERS), corrigido
+  para RF-21 e RN-11; `ESTRUTURA.md` e `README.md` atualizados.
+- **Testes:** `cd backend && python -m pytest` → 131 passed;
+  `cd frontend && npm run build` → ok; fluxo manual carrinho → prévia → pedido
+  de entrega com uvicorn e `dados_demo`.
+- **Problemas da IA:** nenhum erro de código ficou no commit. O diagrama
+  contradizia a ERS em dois pontos (`EM_ROTA`, crédito de pontos em PAGO) e
+  fixava valores do TBD-2; a IA parou e perguntou antes de seguir.
+- **Pendências:** tabelas de pagamento (TPT), cartão salvo, cupom e fidelidade
+  (entram com UC30 em diante); quem tem `burguerja.db` local precisa apagá-lo;
+  o branch se chama `claude/awesome-turing-3m0yie` (imposto pela sessão na
+  nuvem), fora do padrão `<autor>/<tema>`.
+
+## Reflexão
+
+Ter o diagrama como arquivo legível facilitou comparar coluna a coluna e
+encontrar contradições com a ERS antes de codificar. Perguntar as divergências
+de uma vez, com uma recomendação para cada, evitou retrabalho. Faltou uma
+estratégia de migração: a troca do esquema exige apagar o banco local.
