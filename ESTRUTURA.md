@@ -30,8 +30,7 @@ entra aqui no mesmo commit.
 │   │   │   ├── unidades.py   /api/unidades e cardápio — públicas, infra mínima (Q1, Q2)
 │   │   │   ├── carrinho.py   /api/carrinho — UC29 (+ adicionar/esvaziar, infra mínima)
 │   │   │   ├── enderecos.py  GET /api/enderecos — só listagem, usada pelo UC28 (CRUD = UC33)
-│   │   │   ├── pedidos.py    /api/pedidos/previa e /api/pedidos — UC28
-│   │   │   └── recados.py    ESBOÇO-PROVISÓRIO (/api/recados)
+│   │   │   └── pedidos.py    /api/pedidos/previa e /api/pedidos — UC28
 │   │   ├── servicos/         Regras de negócio (cálculos e validações), sem HTTP
 │   │   │   ├── precos.py     RF-02, RF-11
 │   │   │   ├── cardapio.py   Cache do cardápio do SGL (RF-10, RF-13, RNF-03, RNF-22)
@@ -42,6 +41,8 @@ entra aqui no mesmo commit.
 │   │       ├── sgl.py        Cardápio das unidades (SGL)
 │   │       ├── geocodificacao.py  CEP → latitude/longitude por tabela fixa (decisão Q8)
 │   │       └── dados_simulados/   Respostas fixas dos mocks (JSON)
+│   ├── scripts/
+│   │   └── dados_demo.py     Cliente de demonstração com endereços (só desenvolvimento; não é rota)
 │   └── tests/
 │       ├── conftest.py       Fixtures: banco SQLite temporário + TestClient
 │       ├── test_saude.py     /api/health e isolamento do banco
@@ -52,16 +53,26 @@ entra aqui no mesmo commit.
 │       ├── test_checkout.py  UC28
 │       ├── test_dinheiro.py  RNF-23
 │       ├── test_integracoes.py  RNF-19 com falhas simuladas
-│       └── test_api.py       ESBOÇO-PROVISÓRIO (recados)
+│       ├── test_concorrencia.py Conexão usada em outra thread (evita "database is locked")
+│       └── test_dados_demo.py   Script de dados de demonstração
 ├── frontend/                 Interface — TypeScript + React (Vite)
 │   ├── package.json
 │   ├── vite.config.ts        Porta 5173 e proxy de /api para a API (porta 8000)
 │   ├── index.html
 │   └── src/
-│       ├── main.tsx          Monta o React
-│       ├── App.tsx           Página atual (teste de integração)
-│       ├── api.ts            Cliente da API REST (todo fetch passa por aqui)
-│       └── index.css         Estilos globais
+│       ├── main.tsx          Monta o React e importa os estilos
+│       ├── App.tsx           Escolhe a tela pela rota e protege as que exigem login (RN-01)
+│       ├── navegacao.ts      Rotas pelo "#" da URL (#/cardapio, #/item/3 ...), sem dependência extra
+│       ├── api.ts            Cliente da API REST e tipos das respostas (todo fetch passa por aqui)
+│       ├── formatar.ts       Moeda, data, distância e nomes em pt-BR
+│       ├── useCarregar.ts    Hook de carregamento (dados / erro / carregando)
+│       ├── estilos/
+│       │   ├── tema.css      ÚNICO lugar com cores, fontes, tamanhos, raios e sombras
+│       │   └── global.css    Base e moldura do app (coluna de celular, tela, utilitários)
+│       ├── contextos/        Estado compartilhado: Sessao.tsx (cliente, unidade) e Carrinho.tsx
+│       ├── componentes/      Componentes reutilizáveis (Botao, Campo, Cartao, Tela, Folha...) + componentes.css
+│       └── paginas/          Uma tela por arquivo (Entrar, Inicio, Cardapio, DetalheItem, Sacola,
+│                             Checkout, PedidoRecebido, EmBreve) + paginas.css
 ├── docs/
 │   ├── srs/                  ERS em Markdown (srs-pt.md) + figuras (media/)
 │   ├── apresentacoes/        Resumos para o professor (AAAA-MM-DD_<tema>.md)
@@ -82,39 +93,46 @@ entra aqui no mesmo commit.
    quando crescer). Componentes não chamam `fetch` diretamente.
 5. **Todo endpoint novo ganha teste** em `backend/tests/`.
 6. **Arquivos gerados não entram no git:** `.venv/`, `node_modules/`, `dist/`, `*.db`.
-7. **A tabela `recado`, as rotas `/api/recados` e a página de `App.tsx` são só
-   um teste de integração** (marcados com `ESBOÇO-PROVISÓRIO`). Remova-os no PR
-   da primeira funcionalidade real; a lista completa está no `AGENTS.md`, seção 7.
-8. **Nada vai direto para a `main`.** Cada tarefa num branch `<autor>/<tema>` e
+7. **Nada vai direto para a `main`.** Cada tarefa num branch `<autor>/<tema>` e
    merge por pull request revisado por outro integrante (`AGENTS.md`, seção 6).
-9. **Rotas em `backend/app/routers/<funcionalidade>.py`**, cada uma com seu
+8. **Rotas em `backend/app/routers/<funcionalidade>.py`**, cada uma com seu
    `APIRouter`; `main.py` só registra os routers.
-10. **Dinheiro é sempre `int` em centavos** (RNF-23). Use `app/dinheiro.py`;
+9. **Dinheiro é sempre `int` em centavos** (RNF-23). Use `app/dinheiro.py`;
     nunca `float` nem `REAL` no banco.
-11. **Sistemas externos só em `backend/app/integracoes/`**, e toda chamada passa
+10. **Sistemas externos só em `backend/app/integracoes/`**, e toda chamada passa
     por `base.chamar_com_tempo_limite` (RNF-19). Os mocks aceitam um
     `transporte` para os testes simularem falhas. Tempo limite padrão: 3 s,
     configurável em `BURGUERJA_TIMEOUT_INTEGRACOES`.
-12. **Testes usam a fixture `client`** (`tests/conftest.py`), que cria um banco
+11. **Testes usam a fixture `client`** (`tests/conftest.py`), que cria um banco
     temporário via `BURGUERJA_DB`; nunca o `burguerja.db` real. Outras fixtures:
     `sgl` (SGL simulado que o teste altera), `relogio` (hora controlada),
     `novo_cliente`/`ana` (cliente logado) e `banco` (acesso direto para testar
     restrições do esquema).
-13. **Regras de negócio em `backend/app/servicos/`**; os routers só validam a
+12. **Regras de negócio em `backend/app/servicos/`**; os routers só validam a
     entrada, chamam o serviço e devolvem a resposta.
-14. **Rotas protegidas usam `Depends(seguranca.cliente_atual)`** e filtram tudo
+13. **Rotas protegidas usam `Depends(seguranca.cliente_atual)`** e filtram tudo
     pelo id do cliente (RN-02, RNF-13). Recurso de outro cliente responde 404.
-15. **Hora atual só por `app/relogio.py`** (nunca `datetime.now()` direto), para
+14. **Hora atual só por `app/relogio.py`** (nunca `datetime.now()` direto), para
     os testes controlarem o tempo.
-16. **Funcionalidade sem caso de uso na ERS** (cadastro, login, unidades,
+15. **Funcionalidade sem caso de uso na ERS** (cadastro, login, unidades,
     cardápio, adicionar ao carrinho, esvaziar) é marcada como "infra mínima —
     sem UC na ERS" no código (decisão Q1).
+16. **Cores, fontes e medidas só em `frontend/src/estilos/tema.css`**, como
+    variáveis CSS (`var(--cor-primaria)`). Os outros `.css` não têm cor nem fonte
+    "solta". Valores tirados dos wireframes da ERS (seção 3.1).
+17. **Telas em `frontend/src/paginas/`, uma por arquivo**, montadas com os
+    componentes de `frontend/src/componentes/` (importe de `../componentes`). Antes
+    de criar um elemento visual novo, veja se já existe um componente; se for
+    reutilizável, crie-o lá. Toda tela usa `<Tela>` (cabeçalho, rodapé fixo, abas).
+18. **Toda a interface em português do Brasil** (ERS 2.4), com erros junto ao
+    campo e confirmação para ações que não podem ser desfeitas (`<Folha>`, ERS 3.1).
+19. **Dados de demonstração só por `backend/scripts/`**, nunca por rota da API.
 
 ## Crescimento previsto (sugestão, não obrigatório)
 
-No back-end, os routers e serviços já estão separados (regras 9 e 13). Os
-próximos casos de uso (UC30 cupom, UC31, UC32, UC33) entram como novos arquivos
+Os próximos casos de uso (UC30 cupom, UC31, UC32, UC33) entram como novos arquivos
 em `routers/` e `servicos/`; o UC30 deve preencher `desconto_cupom_centavos` em
-`servicos/checkout.py`. No front-end, a ideia é
-`frontend/src/pages/<Tela>.tsx` + `frontend/src/components/`. Ao fazer isso,
-atualize a árvore e as regras acima.
+`servicos/checkout.py`. No front-end: o cupom entra na `Sacola`/`Checkout` (tela 07),
+o pagamento substitui a tela `PedidoRecebido` (telas 08–10), e o UC31 e a
+fidelidade substituem `EmBreve` (telas 11–14). O UC33 (tela 03) deve ligar o
+"novo endereço" do `Checkout` (UC28 A2). Ao fazer isso, atualize a árvore e as regras acima.

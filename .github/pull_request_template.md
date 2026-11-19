@@ -34,5 +34,4 @@
 - [ ] `ESTRUTURA.md` atualizado se houve pasta, arquivo importante ou regra nova
 - [ ] Registro de IA da sessão commitado e linha adicionada em `docs/ia/INDICE.md`
 - [ ] Sem segredos, `.env`, banco (`*.db`), `node_modules/` ou `.venv/` no diff
-- [ ] Se este é o 1º PR com funcionalidade real: esboço `ESBOÇO-PROVISÓRIO` removido (AGENTS.md, seção 7)
 - [ ] Pelo menos um outro integrante revisou e aprovou
