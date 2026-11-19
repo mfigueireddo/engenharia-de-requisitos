@@ -68,6 +68,22 @@ modelo de `.github/pull_request_template.md`.
 
 **Decisão humana:** aceito (pedido direto do humano).
 
+### 3
+
+**Prompt (literal):**
+
+```text
+vc n fez um arquivo so do paulo?
+```
+
+**Saída (resumo):** a IA respondeu que não: fez um arquivo único
+(`2026-11-19_resumo-matheus-paulo.md`) com uma seção para cada um, e
+perguntou se o humano quer separar em dois arquivos.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** <pendente>
+
 ## Resultado
 
 - **Entregue:** resumo de uma página das contribuições e relatório do estado atual × ERS × diagrama.
