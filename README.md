@@ -25,6 +25,8 @@ npm install
 npm run dev
 ```
 
+Se a API recusar o banco por ser de um esquema antigo, apague `backend/burguerja.db` (ele é recriado vazio).
+
 Testes da API: `cd backend && python -m pytest`
 
 Contribuição: um branch por tarefa e merge na `main` só por pull request (ver [AGENTS.md](AGENTS.md), seção 6).

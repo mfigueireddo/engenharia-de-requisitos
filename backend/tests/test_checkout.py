@@ -11,7 +11,7 @@ import pytest
 
 from app.integracoes.base import IntegracaoIndisponivel
 from app.servicos import checkout
-from conftest import produtos
+from conftest import produtos, unidade_id
 
 CEP_PUC = "22451-900"            # ~0,2 km da unidade Gávea; ~5,5 km da Botafogo
 CEP_JARDIM_BOTANICO = "22470-050"
@@ -23,8 +23,9 @@ def gavea(client, sgl):
     return produtos(client)
 
 
-def _add(client, headers, produto_id, quantidade=1):
-    r = client.post("/api/carrinho/itens", json={"produto_id": produto_id, "quantidade": quantidade}, headers=headers)
+def _add(client, headers, produto_id, quantidade=1, unidade="BurguerJá Gávea"):
+    corpo = {"unidade_id": unidade_id(client, unidade), "produto_id": produto_id, "quantidade": quantidade}
+    r = client.post("/api/carrinho/itens", json=corpo, headers=headers)
     assert r.status_code == 201, r.text
     return r.json()
 
@@ -33,7 +34,7 @@ def _endereco(client, banco, headers, cep=CEP_PUC, rua="Rua Marquês de São Vic
     """Os endereços são do UC33 (outro integrante); aqui entram direto no banco."""
     cliente_id = client.get("/api/clientes/me", headers=headers).json()["id"]
     cur = banco.execute(
-        """INSERT INTO endereco (cliente_id, rua, numero, complemento, bairro, cidade, estado, cep)
+        """INSERT INTO endereco_cliente (cliente_id, logradouro, numero, complemento, bairro, cidade, estado, cep)
            VALUES (?, ?, '225', NULL, 'Gávea', 'Rio de Janeiro', 'RJ', ?)""",
         (cliente_id, rua, cep))
     banco.commit()
@@ -91,7 +92,7 @@ def test_passo3_rn04_drive_thru_so_na_unidade_que_tem(client, ana, gavea):
     assert _previa(client, ana, "DRIVE_THRU").status_code == 422
 
     client.delete("/api/carrinho", headers=ana)
-    _add(client, ana, produtos(client, "BurguerJá Botafogo")["Duplo Cheddar"])
+    _add(client, ana, produtos(client, "BurguerJá Botafogo")["Duplo Cheddar"], unidade="BurguerJá Botafogo")
     r = _previa(client, ana, "DRIVE_THRU")
     assert r.status_code == 200 and "DRIVE_THRU" in r.json()["tipos_atendimento_disponiveis"]
 
@@ -124,7 +125,7 @@ def test_entrega_exige_endereco(client, ana, gavea):
 
 
 def test_e2_rf06_endereco_fora_do_raio_nao_pode_ser_usado(client, ana, banco):
-    _add(client, ana, produtos(client, "BurguerJá Botafogo")["Duplo Cheddar"])
+    _add(client, ana, produtos(client, "BurguerJá Botafogo")["Duplo Cheddar"], unidade="BurguerJá Botafogo")
     end = _endereco(client, banco, ana, CEP_PUC)
     r = _previa(client, ana, "ENTREGA", end)
     assert r.status_code == 422 and r.json()["detail"]["motivo"] == "fora_do_raio"
@@ -178,7 +179,7 @@ def test_passos_9_a_11_confirmar_cria_pedido_recebido(client, ana, gavea, banco)
 def test_rf09_itens_passam_do_carrinho_para_o_pedido(client, ana, gavea, banco):
     _add(client, ana, gavea["Burguer Clássico"])
     pedido = _confirmar(client, ana, 2490).json()
-    linhas = banco.execute("SELECT carrinho_id, pedido_id FROM item").fetchall()
+    linhas = banco.execute("SELECT carrinho_id, pedido_id FROM item_pedido").fetchall()
     assert [tuple(l) for l in linhas] == [(None, pedido["id"])]
 
 
@@ -187,9 +188,11 @@ def test_rf03_rn06_preco_congelado_no_pedido(client, ana, gavea, sgl, banco):
     _confirmar(client, ana, 2 * 2490)
     sgl.item("UN-GAVEA", "LAN-01")["preco_centavos"] = 9990
     produtos(client)  # o cardápio novo é carregado
-    item = banco.execute("SELECT * FROM item WHERE pedido_id IS NOT NULL").fetchone()
+    item = banco.execute("SELECT * FROM item_pedido WHERE pedido_id IS NOT NULL").fetchone()
     assert (item["preco_unitario_centavos"], item["desconto_unitario_centavos"], item["valor_final_centavos"]) \
         == (2490, 0, 4980)
+    with pytest.raises(sqlite3.IntegrityError):  # trigger item_pedido_congelado
+        banco.execute("UPDATE item_pedido SET quantidade = 3 WHERE pedido_id IS NOT NULL")
 
 
 def test_rf05_rf31_pedido_guarda_copia_do_endereco(client, ana, gavea, banco):
@@ -197,10 +200,10 @@ def test_rf05_rf31_pedido_guarda_copia_do_endereco(client, ana, gavea, banco):
     end = _endereco(client, banco, ana)
     total = _previa(client, ana, "ENTREGA", end).json()["total_centavos"]
     pedido_id = _confirmar(client, ana, total, "ENTREGA", end).json()["id"]
-    banco.execute("UPDATE endereco SET rua = 'Outra Rua' WHERE id = ?", (end,))
-    banco.execute("DELETE FROM endereco WHERE id = ?", (end,))
+    banco.execute("UPDATE endereco_cliente SET logradouro = 'Outra Rua' WHERE id = ?", (end,))
+    banco.execute("DELETE FROM endereco_cliente WHERE id = ?", (end,))
     banco.commit()
-    assert banco.execute("SELECT entrega_rua FROM pedido WHERE id = ?", (pedido_id,)).fetchone()[0] \
+    assert banco.execute("SELECT logradouro FROM endereco_pedido WHERE pedido_id = ?", (pedido_id,)).fetchone()[0] \
         == "Rua Marquês de São Vicente"
 
 
@@ -230,25 +233,41 @@ def test_confirmar_duas_vezes_nao_duplica_o_pedido(client, ana, gavea, banco):
 # --- Restrições no banco ------------------------------------------------------------
 
 def _inserir_pedido(banco, **campos):
-    base = {"cliente_id": 1, "unidade_id": 1, "status": "RECEBIDO", "tipo_atendimento": "RETIRADA",
-            "subtotal_centavos": 1000, "taxa_entrega_centavos": 0, "total_centavos": 1000}
+    base = {"cliente_id": 1, "unidade_id": 1, "data_hora": "2026-11-19T12:00:00+00:00",
+            "status": "RECEBIDO", "modalidade": "RETIRADA", "taxa_entrega_centavos": 0}
     base.update(campos)
     cols = ", ".join(base)
-    banco.execute(f"INSERT INTO pedido ({cols}) VALUES ({', '.join('?' for _ in base)})", list(base.values()))
+    return banco.execute(f"INSERT INTO pedido ({cols}) VALUES ({', '.join('?' for _ in base)})",
+                         list(base.values())).lastrowid
 
 
 def test_rf04_rn05_rf21_restricoes_do_pedido_no_banco(client, ana, gavea, banco):
     _inserir_pedido(banco)  # retirada válida
-    with pytest.raises(sqlite3.IntegrityError):  # RF-04: retirada com endereço
-        _inserir_pedido(banco, entrega_rua="Rua X")
-    with pytest.raises(sqlite3.IntegrityError):  # RF-04: entrega sem endereço
-        _inserir_pedido(banco, tipo_atendimento="ENTREGA")
+    with pytest.raises(sqlite3.IntegrityError):  # RF-04: retirada com previsão de entrega
+        _inserir_pedido(banco, previsao_entrega="2026-11-19T12:40:00+00:00")
+    with pytest.raises(sqlite3.IntegrityError):  # RF-04: entrega sem previsão
+        _inserir_pedido(banco, modalidade="ENTREGA")
     with pytest.raises(sqlite3.IntegrityError):  # RN-05: retirada com taxa
-        _inserir_pedido(banco, taxa_entrega_centavos=500, total_centavos=1500)
-    with pytest.raises(sqlite3.IntegrityError):  # passo 8: total inconsistente
-        _inserir_pedido(banco, total_centavos=999)
-    with pytest.raises(sqlite3.IntegrityError):  # RF-21
+        _inserir_pedido(banco, taxa_entrega_centavos=500)
+    with pytest.raises(sqlite3.IntegrityError):  # RF-21: o nome da ERS é SAIU_PARA_ENTREGA
         _inserir_pedido(banco, status="EM_ROTA")
+
+
+def test_rf04_endereco_do_pedido_so_em_entrega(client, ana, gavea, banco):
+    """Trigger do projeto relacional: ENDERECO_PEDIDO só existe em pedido de ENTREGA."""
+    retirada = _inserir_pedido(banco)
+    with pytest.raises(sqlite3.IntegrityError):
+        banco.execute("""INSERT INTO endereco_pedido (pedido_id, logradouro, numero, bairro, cidade, estado, cep)
+                         VALUES (?, 'Rua X', '1', 'Gávea', 'Rio de Janeiro', 'RJ', '22451-900')""", (retirada,))
+
+
+def test_rf22_status_do_pedido_segue_a_ultima_notificacao(client, ana, gavea, banco):
+    """Trigger do projeto relacional: PEDIDO.status = status da notificação mais recente."""
+    _add(client, ana, gavea["Burguer Clássico"])
+    pedido_id = _confirmar(client, ana, 2490).json()["id"]
+    banco.execute("""INSERT INTO notificacao (pedido_id, status, data_hora, titulo, mensagem)
+                     VALUES (?, 'PAGO', '2026-11-19T12:05:00+00:00', 'Pago', 'Pagamento aprovado')""", (pedido_id,))
+    assert banco.execute("SELECT status FROM pedido WHERE id = ?", (pedido_id,)).fetchone()[0] == "PAGO"
 
 
 def test_rnf22_pedido_e_notificacao_nunca_apagados(client, ana, gavea, banco):

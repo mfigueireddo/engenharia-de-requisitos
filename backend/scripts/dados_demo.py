@@ -19,9 +19,9 @@ NOME = "Cliente Demo"
 # CEPs presentes em app/integracoes/geocodificacao.py (CEPS_SIMULADOS).
 ENDERECOS = [
     # Perto da unidade Gávea; fora do raio de 4 km da unidade Botafogo (UC28 E2).
-    {"rua": "Rua Marquês de São Vicente", "numero": "225", "complemento": "PUC-Rio",
+    {"logradouro": "Rua Marquês de São Vicente", "numero": "225", "complemento": "PUC-Rio",
      "bairro": "Gávea", "cidade": "Rio de Janeiro", "estado": "RJ", "cep": "22451-900"},
-    {"rua": "Rua Jardim Botânico", "numero": "1008", "complemento": None,
+    {"logradouro": "Rua Jardim Botânico", "numero": "1008", "complemento": None,
      "bairro": "Jardim Botânico", "cidade": "Rio de Janeiro", "estado": "RJ", "cep": "22470-050"},
 ]
 
@@ -39,13 +39,13 @@ def criar() -> None:
         else:
             cliente_id = linha["id"]
         for e in ENDERECOS:
-            existe = conn.execute("SELECT 1 FROM endereco WHERE cliente_id = ? AND cep = ? AND numero = ?",
+            existe = conn.execute("SELECT 1 FROM endereco_cliente WHERE cliente_id = ? AND cep = ? AND numero = ?",
                                   (cliente_id, e["cep"], e["numero"])).fetchone()
             if not existe:
                 conn.execute(
-                    "INSERT INTO endereco (cliente_id, rua, numero, complemento, bairro, cidade, estado, cep) "
+                    "INSERT INTO endereco_cliente (cliente_id, logradouro, numero, complemento, bairro, cidade, estado, cep) "
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    (cliente_id, e["rua"], e["numero"], e["complemento"], e["bairro"],
+                    (cliente_id, e["logradouro"], e["numero"], e["complemento"], e["bairro"],
                      e["cidade"], e["estado"], e["cep"]),
                 )
     print(f"Cliente de demonstração pronto: {EMAIL} / senha {SENHA} ({len(ENDERECOS)} endereços).")

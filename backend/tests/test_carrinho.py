@@ -8,11 +8,11 @@ import sqlite3
 
 import pytest
 
-from conftest import produtos
+from conftest import produtos, unidade_id
 
 
-def _add(client, headers, produto_id, quantidade=1, observacao=None, **extra):
-    corpo = {"produto_id": produto_id, "quantidade": quantidade, **extra}
+def _add(client, headers, produto_id, quantidade=1, observacao=None, unidade="BurguerJá Gávea", **extra):
+    corpo = {"unidade_id": unidade_id(client, unidade), "produto_id": produto_id, "quantidade": quantidade, **extra}
     if observacao is not None:
         corpo["observacao"] = observacao
     return client.post("/api/carrinho/itens", json=corpo, headers=headers)
@@ -142,11 +142,11 @@ def test_adicionar_produto_fora_do_cardapio(client, ana, ids, sgl):
 def test_rn03_rf08_carrinho_de_uma_unidade_so(client, ana, ids):
     botafogo = produtos(client, "BurguerJá Botafogo")
     _add(client, ana, ids["Burguer Clássico"])
-    r = _add(client, ana, botafogo["Duplo Cheddar"])
+    r = _add(client, ana, botafogo["Duplo Cheddar"], unidade="BurguerJá Botafogo")
     assert r.status_code == 409
     # Esvaziar libera a outra unidade.
     assert client.delete("/api/carrinho", headers=ana).json()["itens"] == []
-    r = _add(client, ana, botafogo["Duplo Cheddar"])
+    r = _add(client, ana, botafogo["Duplo Cheddar"], unidade="BurguerJá Botafogo")
     assert r.status_code == 201 and r.json()["unidade"]["nome"] == "BurguerJá Botafogo"
 
 
@@ -154,7 +154,7 @@ def test_rn03_carrinho_sem_itens_pode_trocar_de_unidade(client, ana, ids):
     item = _add(client, ana, ids["Burguer Clássico"]).json()["itens"][0]
     client.delete(f"/api/carrinho/itens/{item['id']}", headers=ana)
     botafogo = produtos(client, "BurguerJá Botafogo")
-    assert _add(client, ana, botafogo["Duplo Cheddar"]).status_code == 201
+    assert _add(client, ana, botafogo["Duplo Cheddar"], unidade="BurguerJá Botafogo").status_code == 201
 
 
 def test_rn02_rnf13_cliente_nao_mexe_no_carrinho_de_outro(client, ana, novo_cliente, ids):
@@ -176,15 +176,39 @@ def test_rf09_item_no_carrinho_ou_no_pedido_nunca_nos_dois(client, ana, ids, ban
     _add(client, ana, ids["Burguer Clássico"])
     car = banco.execute("SELECT * FROM carrinho").fetchone()
     pedido = banco.execute(
-        """INSERT INTO pedido (cliente_id, unidade_id, status, tipo_atendimento, subtotal_centavos, total_centavos)
-           VALUES (?, ?, 'RECEBIDO', 'RETIRADA', 0, 0)""",
+        """INSERT INTO pedido (cliente_id, unidade_id, data_hora, status, modalidade)
+           VALUES (?, ?, '2026-11-19T12:00:00+00:00', 'RECEBIDO', 'RETIRADA')""",
         (car["cliente_id"], car["unidade_id"])).lastrowid
     produto = ids["Burguer Clássico"]
+
+    def inserir(carrinho_id, pedido_id, quantidade=1, preco=1, desconto=0, valor=1):
+        banco.execute("""INSERT INTO item_pedido (carrinho_id, pedido_id, item_cardapio_id, quantidade,
+                             preco_unitario_centavos, desconto_unitario_centavos, valor_final_centavos)
+                         VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                      (carrinho_id, pedido_id, produto, quantidade, preco, desconto, valor))
+
+    inserir(car["id"], None)  # válido
     with pytest.raises(sqlite3.IntegrityError):  # nos dois
-        banco.execute("""INSERT INTO item (carrinho_id, pedido_id, produto_id, quantidade, preco_unitario_centavos,
-                         desconto_unitario_centavos, valor_final_centavos) VALUES (?, ?, ?, 1, 1, 0, 1)""",
-                      (car["id"], pedido, produto))
+        inserir(car["id"], pedido)
     with pytest.raises(sqlite3.IntegrityError):  # em nenhum
-        banco.execute("INSERT INTO item (produto_id, quantidade) VALUES (?, 1)", (produto,))
+        inserir(None, None)
     with pytest.raises(sqlite3.IntegrityError):  # RF-12 no banco
-        banco.execute("INSERT INTO item (carrinho_id, produto_id, quantidade) VALUES (?, ?, 0)", (car["id"], produto))
+        inserir(car["id"], None, quantidade=0, valor=0)
+
+
+def test_rf02_rf10_valores_do_item_conferidos_no_banco(client, ana, ids, banco):
+    """Projeto relacional: 0 ≤ desconto ≤ preço e valor final = qtd × (preço − desconto)."""
+    _add(client, ana, ids["Burguer Clássico"], quantidade=2)
+    with pytest.raises(sqlite3.IntegrityError):  # RF-02
+        banco.execute("UPDATE item_pedido SET valor_final_centavos = valor_final_centavos + 1")
+    with pytest.raises(sqlite3.IntegrityError):  # RF-10
+        banco.execute("UPDATE item_pedido SET desconto_unitario_centavos = preco_unitario_centavos + 1")
+
+
+def test_rf13_carrinho_grava_valores_recalculados(client, ana, ids, sgl, banco):
+    """No carrinho, preço/desconto/valor da linha acompanham o cardápio vigente."""
+    _add(client, ana, ids["Burguer Clássico"], quantidade=2)
+    sgl.item("UN-GAVEA", "LAN-01")["preco_centavos"] = 2690
+    client.get("/api/carrinho", headers=ana)
+    linha = banco.execute("SELECT preco_unitario_centavos, valor_final_centavos FROM item_pedido").fetchone()
+    assert tuple(linha) == (2690, 5380)

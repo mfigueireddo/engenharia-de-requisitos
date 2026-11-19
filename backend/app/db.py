@@ -26,7 +26,21 @@ def conectar() -> sqlite3.Connection:
     return conn
 
 
+# Tabelas do esquema anterior ao projeto relacional (antes de 2026-11-19).
+_TABELAS_ANTIGAS = ("produto", "combo_componente", "item", "endereco")
+
+
 def inicializar() -> None:
-    """Cria as tabelas que ainda não existem, a partir de schema.sql."""
+    """Cria as tabelas que ainda não existem, a partir de schema.sql.
+
+    Não há migração: um banco de desenvolvimento criado com o esquema antigo
+    precisa ser apagado (ele é recriado vazio; ver README)."""
     with conectar() as conn:
+        antigas = [n for (n,) in conn.execute(
+            f"SELECT name FROM sqlite_master WHERE type = 'table' AND name IN "
+            f"({', '.join('?' for _ in _TABELAS_ANTIGAS)})", _TABELAS_ANTIGAS)]
+        if antigas:
+            raise RuntimeError(
+                f"O banco {caminho_banco()} usa o esquema antigo (tabelas {', '.join(antigas)}). "
+                "Apague o arquivo para recriá-lo com o esquema atual.")
         conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))

@@ -29,7 +29,8 @@ def _limpar_observacao(v: str | None) -> str | None:
 
 
 class ItemEntrada(BaseModel):
-    produto_id: int
+    unidade_id: int  # o item é da rede; o cardápio é da unidade
+    produto_id: int  # id de item_cardapio
     quantidade: int = Field(default=1, ge=1)  # RF-12
     observacao: str | None = Field(default=None, max_length=MAX_OBSERVACAO)
 
@@ -46,7 +47,7 @@ class ItemAlteracao(BaseModel):
 def _item_do_cliente(conn: sqlite3.Connection, item_id: int, cliente_id: int) -> sqlite3.Row:
     """RNF-13: item de outro cliente responde 404, sem revelar que existe."""
     item = conn.execute(
-        """SELECT i.*, c.id AS car_id FROM item i JOIN carrinho c ON c.id = i.carrinho_id
+        """SELECT i.*, c.id AS car_id, c.unidade_id FROM item_pedido i JOIN carrinho c ON c.id = i.carrinho_id
             WHERE i.id = ? AND c.cliente_id = ?""",
         (item_id, cliente_id),
     ).fetchone()
@@ -66,13 +67,14 @@ def ver_carrinho(cliente=Depends(seguranca.cliente_atual),
 def adicionar_item(entrada: ItemEntrada, cliente=Depends(seguranca.cliente_atual),
                    conn: sqlite3.Connection = Depends(seguranca.conexao)):
     """UC27 (infra mínima — sem UC na ERS): põe um produto vigente no carrinho."""
-    produto = conn.execute("SELECT id, unidade_id FROM produto WHERE id = ?",
-                           (entrada.produto_id,)).fetchone()
+    unidade = cardapio.obter_unidade(conn, entrada.unidade_id)
+    if unidade is None:
+        raise HTTPException(404, "Unidade não encontrada.")
+    cardapio.atualizar_cardapio(conn, unidade)  # RF-13: confere no cardápio vigente
+    produto = cardapio.produtos(conn, unidade["id"], [entrada.produto_id]).get(entrada.produto_id)
     if produto is None:
         raise HTTPException(404, "Produto não encontrado.")
-    unidade = cardapio.obter_unidade(conn, produto["unidade_id"])
-    cardapio.atualizar_cardapio(conn, unidade)  # RF-13: confere no cardápio vigente
-    if not cardapio.produtos(conn, unidade["id"], [produto["id"]])[produto["id"]]["vigente"]:
+    if not produto["vigente"]:
         raise HTTPException(409, "Este item não está mais no cardápio da unidade.")
 
     car = carrinho.obter(conn, cliente["id"])
@@ -87,8 +89,7 @@ def adicionar_item(entrada: ItemEntrada, cliente=Depends(seguranca.cliente_atual
                 raise HTTPException(409, "Seu carrinho tem itens de outra unidade. "
                                          "Esvazie o carrinho para pedir nesta unidade (RN-03).")
             conn.execute("UPDATE carrinho SET unidade_id = ? WHERE id = ?", (unidade["id"], car_id))
-    conn.execute("INSERT INTO item (carrinho_id, produto_id, quantidade, observacao) VALUES (?, ?, ?, ?)",
-                 (car_id, produto["id"], entrada.quantidade, entrada.observacao))
+    carrinho.inserir(conn, car_id, entrada.quantidade, entrada.observacao, produto)
     carrinho.tocar(conn, car_id)
     return carrinho.montar(conn, cliente["id"])
 
@@ -103,12 +104,15 @@ def alterar_item(item_id: int, entrada: ItemAlteracao, cliente=Depends(seguranca
         raise HTTPException(422, "Quantidade inválida.")
     item = _item_do_cliente(conn, item_id, cliente["id"])
     if entrada.quantidade == 0:  # RF-12, UC29 A1
-        conn.execute("DELETE FROM item WHERE id = ?", (item_id,))
+        conn.execute("DELETE FROM item_pedido WHERE id = ?", (item_id,))
     else:
         if entrada.quantidade is not None:
-            conn.execute("UPDATE item SET quantidade = ? WHERE id = ?", (entrada.quantidade, item_id))
+            # O valor final depende da quantidade (RF-02, CHECK do banco): grava
+            # quantidade e valores juntos, com o preço vigente (RF-13).
+            produto = cardapio.produtos(conn, item["unidade_id"], [item["item_cardapio_id"]])[item["item_cardapio_id"]]
+            carrinho.gravar_valores(conn, item_id, entrada.quantidade, produto)
         if "observacao" in entrada.model_fields_set:  # A2: não altera o valor do item
-            conn.execute("UPDATE item SET observacao = ? WHERE id = ?", (entrada.observacao, item_id))
+            conn.execute("UPDATE item_pedido SET observacao = ? WHERE id = ?", (entrada.observacao, item_id))
     carrinho.tocar(conn, item["car_id"])
     return carrinho.montar(conn, cliente["id"])
 
@@ -118,7 +122,7 @@ def remover_item(item_id: int, cliente=Depends(seguranca.cliente_atual),
                  conn: sqlite3.Connection = Depends(seguranca.conexao)):
     """UC29 A1."""
     item = _item_do_cliente(conn, item_id, cliente["id"])
-    conn.execute("DELETE FROM item WHERE id = ?", (item_id,))
+    conn.execute("DELETE FROM item_pedido WHERE id = ?", (item_id,))
     carrinho.tocar(conn, item["car_id"])
     return carrinho.montar(conn, cliente["id"])
 

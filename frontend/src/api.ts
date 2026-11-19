@@ -176,7 +176,7 @@ export type Pedido = {
   status: string;
   unidade_id: number;
   tipo_atendimento: TipoAtendimento;
-  entrega: { endereco: Omit<Endereco, "id">; distancia_m: number; tempo_estimado_min: number } | null;
+  entrega: { endereco: Omit<Endereco, "id">; previsao_entrega: string; tempo_estimado_min: number } | null;
   itens: { id: number; nome: string; quantidade: number; observacao: string | null; valor_final_centavos: number }[];
   subtotal_centavos: number;
   desconto_cupom_centavos: number;
@@ -204,8 +204,8 @@ export const api = {
 
   // Carrinho (UC29; adicionar e esvaziar são infra mínima)
   carrinho: () => requisitar<Carrinho>("/carrinho"),
-  adicionarItem: (produto_id: number, quantidade: number, observacao: string | null) =>
-    requisitar<Carrinho>("/carrinho/itens", json("POST", { produto_id, quantidade, observacao })),
+  adicionarItem: (unidade_id: number, produto_id: number, quantidade: number, observacao: string | null) =>
+    requisitar<Carrinho>("/carrinho/itens", json("POST", { unidade_id, produto_id, quantidade, observacao })),
   alterarItem: (itemId: number, mudanca: { quantidade?: number; observacao?: string | null }) =>
     requisitar<Carrinho>(`/carrinho/itens/${itemId}`, json("PATCH", mudanca)),
   removerItem: (itemId: number) => requisitar<Carrinho>(`/carrinho/itens/${itemId}`, json("DELETE")),
