@@ -4,7 +4,8 @@ Cada vez que o carrinho é devolvido ao cliente:
 1. tenta atualizar o cardápio da unidade no SGL; se falhar, usa o último salvo
    e informa o horário dele (UC29 E3, RNF-03);
 2. retira itens que saíram do cardápio e avisa (UC29 E2);
-3. recalcula cada item com o preço e o desconto vigentes (RF-02, RF-11, RF-13);
+3. recalcula cada item com o preço e o desconto vigentes (RF-02, RF-11, RF-13)
+   e grava os valores recalculados na linha de `item_pedido`.
 """
 
 import sqlite3
@@ -23,7 +24,32 @@ def tocar(conn: sqlite3.Connection, carrinho_id: int) -> None:
 
 
 def contar_itens(conn: sqlite3.Connection, carrinho_id: int) -> int:
-    return conn.execute("SELECT COUNT(*) FROM item WHERE carrinho_id = ?", (carrinho_id,)).fetchone()[0]
+    return conn.execute("SELECT COUNT(*) FROM item_pedido WHERE carrinho_id = ?", (carrinho_id,)).fetchone()[0]
+
+
+def gravar_valores(conn: sqlite3.Connection, item_id: int, quantidade: int, produto: dict) -> int:
+    """RF-13: grava na linha do carrinho o preço, o desconto e o valor final
+    vigentes (RF-02). Devolve o valor final."""
+    valor = precos.valor_final(quantidade, produto["preco_centavos"], produto["desconto_centavos"])
+    conn.execute(
+        """UPDATE item_pedido SET quantidade = ?, preco_unitario_centavos = ?,
+               desconto_unitario_centavos = ?, valor_final_centavos = ?
+           WHERE id = ? AND carrinho_id IS NOT NULL""",
+        (quantidade, produto["preco_centavos"], produto["desconto_centavos"], valor, item_id),
+    )
+    return valor
+
+
+def inserir(conn: sqlite3.Connection, carrinho_id: int, quantidade: int, observacao: str | None,
+            produto: dict) -> None:
+    valor = precos.valor_final(quantidade, produto["preco_centavos"], produto["desconto_centavos"])
+    conn.execute(
+        """INSERT INTO item_pedido (carrinho_id, item_cardapio_id, quantidade, observacao,
+               preco_unitario_centavos, desconto_unitario_centavos, valor_final_centavos)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (carrinho_id, produto["id"], quantidade, observacao,
+         produto["preco_centavos"], produto["desconto_centavos"], valor),
+    )
 
 
 def _vazio() -> dict:
@@ -40,16 +66,16 @@ def montar(conn: sqlite3.Connection, cliente_id: int) -> dict:
     sgl_ok = cardapio.atualizar_cardapio(conn, unidade)
     unidade = cardapio.obter_unidade(conn, car["unidade_id"])
 
-    linhas = conn.execute("SELECT * FROM item WHERE carrinho_id = ? ORDER BY id", (car["id"],)).fetchall()
-    prods = cardapio.produtos(conn, unidade["id"], [l["produto_id"] for l in linhas])
+    linhas = conn.execute("SELECT * FROM item_pedido WHERE carrinho_id = ? ORDER BY id", (car["id"],)).fetchall()
+    prods = cardapio.produtos(conn, unidade["id"], [l["item_cardapio_id"] for l in linhas])
     avisos, itens, subtotal = [], [], 0
     for l in linhas:
-        p = prods[l["produto_id"]]
+        p = prods[l["item_cardapio_id"]]
         if not p["vigente"]:  # UC29 E2
-            conn.execute("DELETE FROM item WHERE id = ?", (l["id"],))
+            conn.execute("DELETE FROM item_pedido WHERE id = ?", (l["id"],))
             avisos.append(f"{p['nome']} não está mais no cardápio e foi retirado do carrinho.")
             continue
-        valor = precos.valor_final(l["quantidade"], p["preco_centavos"], p["desconto_centavos"])
+        valor = gravar_valores(conn, l["id"], l["quantidade"], p)
         subtotal += valor
         itens.append({
             "id": l["id"], "produto_id": p["id"], "nome": p["nome"], "tipo": p["tipo"],

@@ -40,7 +40,7 @@ export default function DetalheItem({ produtoId }: { produtoId: number }) {
     setEnviando(true);
     try {
       if (esvaziarAntes) await api.esvaziarCarrinho();
-      atualizar(await api.adicionarItem(produto.id, quantidade, observacao.trim() || null));
+      atualizar(await api.adicionarItem(dados!.unidade.id, produto.id, quantidade, observacao.trim() || null));
       ir({ tela: "cardapio" }, { substituir: true });
     } catch (e) {
       if (e instanceof ErroApi && e.status === 409 && e.message.includes("outra unidade")) setOutraUnidade(true);

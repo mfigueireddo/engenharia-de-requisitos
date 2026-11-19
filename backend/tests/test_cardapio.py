@@ -54,19 +54,21 @@ def test_rf10_cardapio_do_sgl_com_desconto_maior_que_o_preco_e_recusado(client, 
 def test_rf10_banco_recusa_desconto_fora_do_intervalo(client, sgl, banco):
     _cardapio(client)
     with pytest.raises(sqlite3.IntegrityError):
-        banco.execute("UPDATE produto SET desconto_centavos = preco_centavos + 1 WHERE tipo = 'SIMPLES'")
+        banco.execute("UPDATE item_simples SET desconto_item_centavos = preco_centavos + 1")
     with pytest.raises(sqlite3.IntegrityError):
-        banco.execute("UPDATE produto SET desconto_centavos = -1 WHERE tipo = 'SIMPLES'")
+        banco.execute("UPDATE item_simples SET desconto_item_centavos = -1")
 
 
-def test_rnf22_item_que_sai_do_sgl_e_desativado_e_nao_apagado(client, sgl, banco):
+def test_rnf22_item_que_sai_do_sgl_sai_do_cardapio_e_nao_e_apagado(client, sgl, banco):
     _cardapio(client)
     sgl.remover("UN-GAVEA", "ACO-01")
     nomes = {p["nome"] for p in _cardapio(client)["produtos"]}
     assert "Batata frita média" not in nomes
     assert "Combo Clássico" not in nomes  # combo sem um componente sai junto
-    vigente = banco.execute("SELECT vigente FROM produto WHERE id_sgl = 'ACO-01'").fetchone()
-    assert vigente is not None and vigente[0] == 0
+    item = banco.execute("SELECT id FROM item_cardapio WHERE id_sgl = 'ACO-01'").fetchone()
+    assert item is not None  # continua em item_cardapio
+    assert banco.execute("SELECT COUNT(*) FROM cardapio_item WHERE item_cardapio_id = ?",
+                         (item[0],)).fetchone()[0] == 0  # mas não está em nenhum cardápio
 
 
 def test_item_que_volta_ao_sgl_volta_ao_cardapio(client, sgl):
@@ -76,3 +78,30 @@ def test_item_que_volta_ao_sgl_volta_ao_cardapio(client, sgl):
     _cardapio(client)
     sgl.cardapios["UN-GAVEA"]["itens"].append(item)
     assert "Combo Clássico" in {p["nome"] for p in _cardapio(client)["produtos"]}
+
+
+def test_projeto_relacional_heranca_do_item_do_cardapio(client, sgl, banco):
+    """Cada ITEM_CARDAPIO está em exatamente uma subtabela; combo tem 2 ou mais itens."""
+    _cardapio(client)
+    combo = banco.execute("SELECT item_cardapio_id FROM combo").fetchone()[0]
+    simples = banco.execute("SELECT item_cardapio_id FROM item_simples").fetchone()[0]
+    with pytest.raises(sqlite3.IntegrityError):
+        banco.execute("INSERT INTO item_simples (item_cardapio_id, preco_centavos) VALUES (?, 100)", (combo,))
+    with pytest.raises(sqlite3.IntegrityError):
+        banco.execute("INSERT INTO combo (item_cardapio_id) VALUES (?)", (simples,))
+    novo = banco.execute("INSERT INTO item_cardapio (id_sgl, nome, categoria) VALUES ('X', 'X', 'X')").lastrowid
+    banco.execute("INSERT INTO combo (item_cardapio_id) VALUES (?)", (novo,))
+    banco.execute("INSERT INTO item_no_combo (combo_id, item_simples_id, quantidade) VALUES (?, ?, 1)",
+                  (novo, simples))
+    with pytest.raises(sqlite3.IntegrityError):  # só 1 item no combo
+        banco.execute("INSERT INTO cardapio_item (cardapio_id, item_cardapio_id) VALUES (1, ?)", (novo,))
+
+
+def test_mesmo_item_e_compartilhado_entre_unidades(client, sgl, banco):
+    """ITEM_CARDAPIO é da rede; CARDAPIO_ITEM liga cada unidade aos itens dela."""
+    sgl.cardapios["UN-BOTAFOGO"]["itens"].append(sgl.item("UN-GAVEA", "LAN-01"))
+    gavea, botafogo = _cardapio(client), _cardapio(client, "BurguerJá Botafogo")
+    id_gavea = next(p["id"] for p in gavea["produtos"] if p["nome"] == "Burguer Clássico")
+    id_botafogo = next(p["id"] for p in botafogo["produtos"] if p["nome"] == "Burguer Clássico")
+    assert id_gavea == id_botafogo
+    assert banco.execute("SELECT COUNT(*) FROM item_cardapio WHERE id_sgl = 'LAN-01'").fetchone()[0] == 1

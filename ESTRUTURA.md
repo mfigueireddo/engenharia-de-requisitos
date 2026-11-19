@@ -20,7 +20,7 @@ entra aqui no mesmo commit.
 │   ├── app/
 │   │   ├── main.py           Cria o app FastAPI e registra os routers
 │   │   ├── db.py             Conexão com o SQLite (arquivo em BURGUERJA_DB) e esquema
-│   │   ├── schema.sql        DDL do banco (CREATE TABLE ...)
+│   │   ├── schema.sql        DDL do banco, segue docs/srs/Projeto_Relacional_de_Tabelas.drawio
 │   │   ├── dinheiro.py       Valores em centavos inteiros, sem float (RNF-23)
 │   │   ├── relogio.py        Data/hora atual (os testes trocam por monkeypatch)
 │   │   ├── seguranca.py      bcrypt, token de sessão, conexão por requisição e cliente_atual (RNF-09, RNF-13)
@@ -75,6 +75,7 @@ entra aqui no mesmo commit.
 │                             Checkout, PedidoRecebido, EmBreve) + paginas.css
 ├── docs/
 │   ├── srs/                  ERS em Markdown (srs-pt.md) + figuras (media/)
+│   │   └── Projeto_Relacional_de_Tabelas.drawio  Modelo relacional do grupo (ERS, Ap. B.3); abrir em app.diagrams.net
 │   ├── apresentacoes/        Resumos para o professor (AAAA-MM-DD_<tema>.md)
 │   ├── planejamento/         Levantamentos e planos de implementação (o que falta, ordem dos PRs)
 │   └── ia/                   Registro do uso de IA (ver docs/ia/README.md)
@@ -89,6 +90,12 @@ entra aqui no mesmo commit.
 2. **Rotas da API começam com `/api/`.** O proxy do Vite depende disso.
 3. **Esquema do banco em `backend/app/schema.sql`.** Tabelas, restrições e
    triggers ficam nesse arquivo (ou em arquivos `.sql` ao lado, se crescer).
+   Ele segue o projeto relacional `docs/srs/Projeto_Relacional_de_Tabelas.drawio`
+   (nomes de tabelas e colunas, FKs, ON DELETE, CHECKs e triggers). Toda
+   diferença em relação ao diagrama fica explicada no cabeçalho do `schema.sql`;
+   quem mudar uma tabela atualiza os dois no mesmo PR. Se o diagrama contradisser
+   a ERS, vale a ERS (ex.: status `SAIU_PARA_ENTREGA`, RF-21). Não há migração:
+   mudou o esquema, apague o `burguerja.db` local (o app recusa banco antigo).
 4. **Chamadas HTTP do front-end só em `frontend/src/api.ts`** (ou em `src/api/`
    quando crescer). Componentes não chamam `fetch` diretamente.
 5. **Todo endpoint novo ganha teste** em `backend/tests/`.
@@ -98,7 +105,8 @@ entra aqui no mesmo commit.
 8. **Rotas em `backend/app/routers/<funcionalidade>.py`**, cada uma com seu
    `APIRouter`; `main.py` só registra os routers.
 9. **Dinheiro é sempre `int` em centavos** (RNF-23). Use `app/dinheiro.py`;
-    nunca `float` nem `REAL` no banco.
+    nunca `float` nem `REAL` no banco para dinheiro. Onde o diagrama diz
+    `DECIMAL(10,2)`, a coluna é `INTEGER` com sufixo `_centavos`.
 10. **Sistemas externos só em `backend/app/integracoes/`**, e toda chamada passa
     por `base.chamar_com_tempo_limite` (RNF-19). Os mocks aceitam um
     `transporte` para os testes simularem falhas. Tempo limite padrão: 3 s,
@@ -131,8 +139,13 @@ entra aqui no mesmo commit.
 ## Crescimento previsto (sugestão, não obrigatório)
 
 Os próximos casos de uso (UC30 cupom, UC31, UC32, UC33) entram como novos arquivos
-em `routers/` e `servicos/`; o UC30 deve preencher `desconto_cupom_centavos` em
-`servicos/checkout.py`. No front-end: o cupom entra na `Sacola`/`Checkout` (tela 07),
+em `routers/` e `servicos/`, criando no `schema.sql` as tabelas do diagrama que
+ainda faltam: CUPOM_PROMOCIONAL e USO_CUPOM (UC30, que deve preencher
+`desconto_cupom_centavos` em `servicos/checkout.py`), PAGAMENTO com
+PAGAMENTO_PIX/CARTAO/PONTOS e CARTAO_SALVO (Table-Per-Type, ERS 2.5) e
+PROGRAMA_FIDELIDADE, PONTOS_FIDELIDADE e CONSUMO_PONTOS (triggers de fidelidade;
+crédito quando o pedido chega a ENTREGUE, RN-11; valores do diagrama como
+provisórios do TBD-2, decisão de 2026-11-19). No front-end: o cupom entra na `Sacola`/`Checkout` (tela 07),
 o pagamento substitui a tela `PedidoRecebido` (telas 08–10), e o UC31 e a
 fidelidade substituem `EmBreve` (telas 11–14). O UC33 (tela 03) deve ligar o
 "novo endereço" do `Checkout` (UC28 A2). Ao fazer isso, atualize a árvore e as regras acima.

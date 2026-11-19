@@ -22,7 +22,7 @@ relacional de tabelas do grupo (`Projeto_Relacional_de_Tabelas.drawio`, enviado
 pelo humano; é o diagrama previsto no Apêndice B.3 da ERS).
 
 **Requisitos da ERS relacionados:** Seção 2.5 (modelo relacional, triggers de
-fidelidade, Table-Per-Type de pagamento), RF-09, RF-21, RNF-21, RNF-22, RNF-23, B.3, TBD-2.
+fidelidade, Table-Per-Type de pagamento), RF-02, RF-03, RF-04, RF-05, RF-09, RF-10, RF-11, RF-13, RF-21, RN-05, RN-11, RNF-21, RNF-22, RNF-23, B.3, TBD-2.
 
 ## Interações
 
@@ -49,5 +49,60 @@ valores de fidelidade que a ERS deixa como TBD-2. Faltam 15 tabelas (pagamento
 TPT, cartão salvo, cupom, fidelidade), ligadas a UCs ainda não implementados.
 
 **Arquivos alterados:** este registro.
+
+**Decisão humana:** aceito — o humano escolheu alinhar o código ao diagrama e incluir o `.drawio` em `docs/srs/` (ver interação 2).
+
+### 2
+
+**Prompt (literal):**
+
+```text
+alinha o codigo ao diagrama
+pode colocar no srs sim
+```
+
+**Saída (resumo):** antes de refatorar, a IA listou ao humano (AGENTS.md §2)
+os pontos em que o diagrama contradiz a ERS ou cria campos sem requisito e
+perguntou como seguir. Respostas: status `SAIU_PARA_ENTREGA` (ERS, RF-21) e
+corrigir o `.drawio`; fidelidade com crédito em ENTREGUE (RN-11) usando os
+valores do diagrama como provisórios do TBD-2; colunas sem requisito
+(telefone, notificações, telefone/horário da unidade) **opcionais**; **não**
+criar agora as tabelas de pagamento, cartão, cupom e fidelidade (só refatorar
+as existentes).
+
+Feito em seguida:
+- `backend/app/schema.sql` reescrito com os nomes e a estrutura do diagrama:
+  `endereco_unidade`, `cardapio`, `cardapio_item`, `item_cardapio` (item da
+  rede, não da unidade) com herança `item_simples`/`combo` e `item_no_combo`;
+  `endereco_cliente` (`logradouro`); `item_pedido` (antes `item`) com preços
+  NOT NULL e CHECKs de RF-02/RF-10; `pedido` com `modalidade`, `data_hora`,
+  `previsao_entrega` e sem totais (vêm da soma dos itens); `endereco_pedido`.
+  Triggers do diagrama: subtipo único do item, combo com 2 ou mais itens,
+  endereço do pedido só em ENTREGA, item de pedido congelado, status do pedido
+  = última notificação. Mantidos: centavos (RNF-23), `sessao`, cache do SGL,
+  RNF-22. Diferenças explicadas no cabeçalho do `schema.sql`.
+- Serviços e rotas adaptados (`cardapio.py` grava em SAVEPOINT; carrinho grava
+  os valores recalculados na linha; checkout grava `endereco_pedido`). A API
+  manteve os nomes públicos (`rua`, `tipo_atendimento`...); única mudança:
+  `POST /api/carrinho/itens` passa a exigir `unidade_id`, porque o item agora é
+  da rede (front-end ajustado em `api.ts` e `DetalheItem.tsx`). O pedido não
+  devolve mais `distancia_m` (não é coluna do diagrama), e sim `previsao_entrega`.
+- Mock do SGL de unidades com os nomes do diagrama; `db.inicializar` recusa
+  banco no esquema antigo com mensagem clara (sem migração).
+- Diagrama copiado para `docs/srs/Projeto_Relacional_de_Tabelas.drawio` com
+  `EM_ROTA` → `SAIU_PARA_ENTREGA` e "pedido PAGO" → "pedido ENTREGUE (RN-11)".
+- `ESTRUTURA.md` (regras 3 e 9, árvore, crescimento previsto) e `README.md`.
+- Testes: `python -m pytest` → **131 passed** (antes 124; novos testes de
+  CHECKs/triggers do diagrama e do banco antigo). `npm run build` → ok.
+  Teste manual com uvicorn + `dados_demo`: carrinho, prévia e pedido de
+  entrega funcionando.
+
+**Arquivos alterados:** `backend/app/schema.sql`, `backend/app/db.py`,
+`backend/app/servicos/{cardapio,carrinho,checkout}.py`,
+`backend/app/routers/{carrinho,unidades,enderecos}.py`,
+`backend/app/integracoes/dados_simulados/unidades_sgl.json`,
+`backend/scripts/dados_demo.py`, `backend/tests/test_{cardapio,carrinho,checkout,saude}.py`,
+`frontend/src/api.ts`, `frontend/src/paginas/DetalheItem.tsx`,
+`docs/srs/Projeto_Relacional_de_Tabelas.drawio`, `ESTRUTURA.md`, `README.md`, este registro.
 
 **Decisão humana:** (pendente)

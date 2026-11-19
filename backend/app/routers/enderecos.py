@@ -17,6 +17,7 @@ router = APIRouter(prefix="/api/enderecos", tags=["endereços (listagem para o U
 def meus_enderecos(cliente=Depends(seguranca.cliente_atual),
                    conn: sqlite3.Connection = Depends(seguranca.conexao)):
     linhas = conn.execute(
-        "SELECT id, rua, numero, complemento, bairro, cidade, estado, cep FROM endereco "
+        "SELECT id, logradouro AS rua, numero, complemento, bairro, cidade, estado, cep "
+        "FROM endereco_cliente "
         "WHERE cliente_id = ? ORDER BY id", (cliente["id"],)).fetchall()
     return [dict(l) for l in linhas]

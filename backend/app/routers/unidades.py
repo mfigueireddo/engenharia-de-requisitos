@@ -15,15 +15,18 @@ router = APIRouter(prefix="/api/unidades", tags=["unidades e cardÃ¡pio (infra mÃ
 
 
 def _unidade_publica(u: sqlite3.Row) -> dict:
-    return {"id": u["id"], "nome": u["nome"], "rua": u["rua"], "numero": u["numero"],
+    # Nomes da API mantidos (contrato com o front-end); no banco: endereco_unidade.logradouro
+    # e unidade.aceita_drive_thru.
+    return {"id": u["id"], "nome": u["nome"], "rua": u["logradouro"], "numero": u["numero"],
             "bairro": u["bairro"], "cidade": u["cidade"], "estado": u["estado"], "cep": u["cep"],
-            "tem_drive_thru": bool(u["tem_drive_thru"])}
+            "tem_drive_thru": bool(u["aceita_drive_thru"])}
 
 
 @router.get("")
 def listar_unidades(conn: sqlite3.Connection = Depends(seguranca.conexao)):
     cardapio.sincronizar_unidades(conn)
-    return [_unidade_publica(u) for u in conn.execute("SELECT * FROM unidade ORDER BY nome")]
+    ids = [u["id"] for u in conn.execute("SELECT id FROM unidade ORDER BY nome")]
+    return [_unidade_publica(cardapio.obter_unidade(conn, i)) for i in ids]
 
 
 @router.get("/{unidade_id}/cardapio")

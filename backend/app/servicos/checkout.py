@@ -10,8 +10,15 @@ Fórmulas que a ERS deixa em aberto, decididas pelo humano na sessão
   estimativa; o front-end deve apresentá-lo assim.
 
 Cupom (A3): o UC30 é de outro integrante. O total já prevê o desconto
-(`desconto_cupom_centavos`), hoje sempre zero; o UC30 deve preenchê-lo aqui.
+(`desconto_cupom_centavos`), hoje sempre zero; o UC30 deve preenchê-lo aqui
+(no banco, pela tabela USO_CUPOM do projeto relacional).
+
+Tabelas (projeto relacional): `pedido` (modalidade, taxa, previsao_entrega),
+`endereco_pedido` (cópia do endereço, só em ENTREGA) e `item_pedido`. Subtotal
+e total não são colunas: saem da soma dos itens (passo 8).
 """
+
+from datetime import timedelta
 
 import math
 import sqlite3
@@ -66,12 +73,15 @@ def tempo_estimado_min(distancia: int) -> int:
 def tipos_disponiveis(unidade: sqlite3.Row) -> list[str]:
     """Passo 3 / RN-04: drive-thru só na unidade que tem. A entrega aparece como
     opção, mas só vale para endereço dentro do raio (verificado no passo 6)."""
-    return [t for t in TIPOS if t != "DRIVE_THRU" or unidade["tem_drive_thru"]]
+    return [t for t in TIPOS if t != "DRIVE_THRU" or unidade["aceita_drive_thru"]]
+
+
+_CAMPOS_ENDERECO = ("logradouro", "numero", "complemento", "bairro", "cidade", "estado", "cep")
 
 
 def _endereco_publico(e) -> dict:
-    return {"id": e["id"], "rua": e["rua"], "numero": e["numero"], "complemento": e["complemento"],
-            "bairro": e["bairro"], "cidade": e["cidade"], "estado": e["estado"], "cep": e["cep"]}
+    # A API mantém "rua"; no banco a coluna é "logradouro" (projeto relacional).
+    return {"id": e["id"], "rua": e["logradouro"], **{k: e[k] for k in _CAMPOS_ENDERECO[1:]}}
 
 
 def calcular(conn: sqlite3.Connection, cliente_id: int, escolha: Escolha) -> dict:
@@ -89,7 +99,7 @@ def calcular(conn: sqlite3.Connection, cliente_id: int, escolha: Escolha) -> dic
     if escolha.tipo_atendimento == "ENTREGA":
         if escolha.endereco_id is None:
             raise ErroCheckout(422, "endereco_obrigatorio", "Escolha um endereço para a entrega.")
-        end = conn.execute("SELECT * FROM endereco WHERE id = ? AND cliente_id = ?",
+        end = conn.execute("SELECT * FROM endereco_cliente WHERE id = ? AND cliente_id = ?",
                            (escolha.endereco_id, cliente_id)).fetchone()
         if end is None:  # RNF-13: endereço de outro cliente = não encontrado
             raise ErroCheckout(404, "endereco_nao_encontrado", "Endereço não encontrado.")
@@ -105,7 +115,7 @@ def calcular(conn: sqlite3.Connection, cliente_id: int, escolha: Escolha) -> dic
             raise ErroCheckout(422, "cep_desconhecido",
                                "Não conseguimos localizar este CEP; o endereço não pode ser usado para entrega.")
         dist = distancia_m(unidade["latitude"], unidade["longitude"], coord.latitude, coord.longitude)
-        if dist > unidade["raio_max_entrega_m"]:  # E2, RF-06, RN-04
+        if dist > unidade["distancia_maxima_km"] * 1000:  # E2, RF-06, RN-04
             raise ErroCheckout(422, "fora_do_raio",
                                "Este endereço está fora da área de entrega da unidade. "
                                "Escolha outro endereço ou outro tipo de atendimento.")
@@ -135,35 +145,39 @@ def confirmar(conn: sqlite3.Connection, cliente_id: int, escolha: Escolha, total
         raise ErroCheckout(409, "valores_mudaram",
                            "Os valores do pedido mudaram. Revise o resumo antes de confirmar.")
     car = carrinho.obter(conn, cliente_id)
-    agora = relogio.para_texto(relogio.agora())
-    e = (calc["entrega"] or {}).get("endereco") or {}
+    momento = relogio.agora()
+    agora = relogio.para_texto(momento)
+    entrega = calc["entrega"]
+    previsao = (relogio.para_texto(momento + timedelta(minutes=entrega["tempo_estimado_min"]))
+                if entrega else None)
+    # O status inicial vem da notificação RECEBIDO (trigger pedido_status_da_notificacao);
+    # o INSERT já usa o mesmo valor porque a coluna é NOT NULL.
     cur = conn.execute(
-        """INSERT INTO pedido (cliente_id, unidade_id, status, tipo_atendimento,
-               entrega_rua, entrega_numero, entrega_complemento, entrega_bairro, entrega_cidade,
-               entrega_estado, entrega_cep, distancia_m, tempo_estimado_min, subtotal_centavos,
-               taxa_entrega_centavos, desconto_cupom_centavos, total_centavos, criado_em)
-           VALUES (?, ?, 'RECEBIDO', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (cliente_id, car["unidade_id"], escolha.tipo_atendimento,  # RF-01
-         e.get("rua"), e.get("numero"), e.get("complemento"), e.get("bairro"), e.get("cidade"),
-         e.get("estado"), e.get("cep"),  # RF-05: cópia do endereço
-         (calc["entrega"] or {}).get("distancia_m"), (calc["entrega"] or {}).get("tempo_estimado_min"),
-         calc["subtotal_centavos"], calc["taxa_entrega_centavos"], calc["desconto_cupom_centavos"],
-         calc["total_centavos"], agora),
+        """INSERT INTO pedido (cliente_id, unidade_id, data_hora, modalidade, status,
+               taxa_entrega_centavos, previsao_entrega)
+           VALUES (?, ?, ?, ?, 'RECEBIDO', ?, ?)""",
+        (cliente_id, car["unidade_id"], agora, escolha.tipo_atendimento,  # RF-01
+         calc["taxa_entrega_centavos"], previsao),
     )
     pedido_id = cur.lastrowid
-    # Passo 10: os itens saem do carrinho e entram no pedido (RF-09) com preço,
-    # desconto e valor final congelados (RF-03, RN-06).
+    if entrega:  # RF-05, RF-31: cópia do endereço, na mesma transação do pedido
+        e = entrega["endereco"]
+        conn.execute(
+            f"INSERT INTO endereco_pedido (pedido_id, {', '.join(_CAMPOS_ENDERECO)}) "
+            f"VALUES (?, {', '.join('?' for _ in _CAMPOS_ENDERECO)})",
+            (pedido_id, e["rua"], *(e[k] for k in _CAMPOS_ENDERECO[1:])),
+        )
+    # Passo 10: os itens saem do carrinho e entram no pedido (RF-09). Os valores
+    # já foram recalculados e gravados pelo carrinho.montar (RF-13) e, com
+    # pedido_id preenchido, ficam congelados (RF-03, RN-06; trigger item_pedido_congelado).
     for item in calc["carrinho"]["itens"]:
         conn.execute(
-            """UPDATE item SET carrinho_id = NULL, pedido_id = ?, preco_unitario_centavos = ?,
-                   desconto_unitario_centavos = ?, valor_final_centavos = ?
-               WHERE id = ? AND carrinho_id = ?""",
-            (pedido_id, item["preco_unitario_centavos"], item["desconto_unitario_centavos"],
-             item["valor_final_centavos"], item["id"], car["id"]),
+            "UPDATE item_pedido SET carrinho_id = NULL, pedido_id = ? WHERE id = ? AND carrinho_id = ?",
+            (pedido_id, item["id"], car["id"]),
         )
     conn.execute("DELETE FROM carrinho WHERE id = ?", (car["id"],))  # carrinho já está vazio
     conn.execute(  # passo 11, RF-22
-        "INSERT INTO notificacao (pedido_id, status, titulo, mensagem, criado_em) VALUES (?, 'RECEBIDO', ?, ?, ?)",
+        "INSERT INTO notificacao (pedido_id, status, titulo, mensagem, data_hora) VALUES (?, 'RECEBIDO', ?, ?, ?)",
         (pedido_id, "Pedido recebido", "Recebemos seu pedido. Agora é só concluir o pagamento.", agora),
     )
     return pedido_id
@@ -172,28 +186,32 @@ def confirmar(conn: sqlite3.Connection, cliente_id: int, escolha: Escolha, total
 def pedido_publico(conn: sqlite3.Connection, pedido_id: int) -> dict:
     p = conn.execute("SELECT * FROM pedido WHERE id = ?", (pedido_id,)).fetchone()
     itens = conn.execute(
-        """SELECT i.id, pr.nome, i.quantidade, i.observacao, i.preco_unitario_centavos,
+        """SELECT i.id, ic.nome, i.quantidade, i.observacao, i.preco_unitario_centavos,
                   i.desconto_unitario_centavos, i.valor_final_centavos
-             FROM item i JOIN produto pr ON pr.id = i.produto_id
+             FROM item_pedido i JOIN item_cardapio ic ON ic.id = i.item_cardapio_id
             WHERE i.pedido_id = ? ORDER BY i.id""",
         (pedido_id,),
     ).fetchall()
     notificacoes = conn.execute(
-        "SELECT status, titulo, mensagem, criado_em FROM notificacao WHERE pedido_id = ? ORDER BY id",
+        "SELECT status, titulo, mensagem, data_hora AS criado_em FROM notificacao WHERE pedido_id = ? ORDER BY id",
         (pedido_id,),
     ).fetchall()
     entrega = None
-    if p["tipo_atendimento"] == "ENTREGA":
-        entrega = {"endereco": {k: p[f"entrega_{k}"] for k in
-                                ("rua", "numero", "complemento", "bairro", "cidade", "estado", "cep")},
-                   "distancia_m": p["distancia_m"], "tempo_estimado_min": p["tempo_estimado_min"]}
+    if p["modalidade"] == "ENTREGA":
+        end = conn.execute("SELECT * FROM endereco_pedido WHERE pedido_id = ?", (pedido_id,)).fetchone()
+        minutos = (relogio.de_texto(p["previsao_entrega"]) - relogio.de_texto(p["data_hora"])) // timedelta(minutes=1)
+        entrega = {"endereco": {k: v for k, v in _endereco_publico(end).items() if k != "id"},
+                   "previsao_entrega": p["previsao_entrega"], "tempo_estimado_min": minutos}
+    subtotal = sum(i["valor_final_centavos"] for i in itens)
+    desconto_cupom = 0  # UC30 (USO_CUPOM) ainda não implementado
     return {
         "id": p["id"], "status": p["status"], "unidade_id": p["unidade_id"],
-        "tipo_atendimento": p["tipo_atendimento"], "entrega": entrega,
+        "tipo_atendimento": p["modalidade"], "entrega": entrega,
         "itens": [dict(i) for i in itens],
-        "subtotal_centavos": p["subtotal_centavos"],
-        "desconto_cupom_centavos": p["desconto_cupom_centavos"],
+        "subtotal_centavos": subtotal,
+        "desconto_cupom_centavos": desconto_cupom,
         "taxa_entrega_centavos": p["taxa_entrega_centavos"],
-        "total_centavos": p["total_centavos"], "criado_em": p["criado_em"],
+        "total_centavos": subtotal - desconto_cupom + p["taxa_entrega_centavos"],  # UC28 passo 8
+        "criado_em": p["data_hora"],
         "notificacoes": [dict(n) for n in notificacoes],
     }
