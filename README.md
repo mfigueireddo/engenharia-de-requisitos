@@ -13,6 +13,10 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+Dados de demonstração (opcional): `cd backend && python -m scripts.dados_demo` cria o
+cliente `demo@burguerja.com` / senha `demo1234`, com endereços para testar a entrega
+(o cadastro de endereços pelo app vem com o UC33).
+
 **2. Front-end** (http://localhost:5173)
 
 ```bash

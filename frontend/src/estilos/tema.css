@@ -1,0 +1,73 @@
+/*
+ * Identidade visual do BurguerJá — ÚNICO lugar com cores, fontes, tamanhos,
+ * raios e sombras. Valores tirados dos wireframes da ERS (seção 3.1, Figuras 2–6).
+ * Os demais .css usam só estas variáveis (nada de cor ou fonte "solta").
+ */
+:root {
+  /* Marca */
+  --cor-primaria: #da291c;          /* vermelho: botões, aba ativa, preços */
+  --cor-primaria-escura: #b71f14;   /* hover / pressionado */
+  --cor-primaria-clara: #fdecea;    /* fundos de erro, selo "Fechada/Cancelado" */
+  --cor-destaque: #ffc72c;          /* amarelo: logo, banner "Combo do dia" */
+  --cor-destaque-clara: #fff3cd;    /* selos "Promoção", "Tempo estimado", pontos */
+  --cor-destaque-texto: #7a5a00;    /* texto sobre o amarelo claro */
+  --cor-foto: #f5e6c8;              /* espaço reservado das fotos */
+  --cor-foto-texto: #a07a2c;
+
+  /* Estados */
+  --cor-sucesso: #1e8a3c;
+  --cor-sucesso-forte: #1e7b34;     /* círculo de confirmação (tela 10) */
+  --cor-sucesso-clara: #e6f4ea;
+  --cor-erro: #da291c;
+  --cor-erro-clara: #fdecea;
+  --cor-aviso-texto: #7a5a00;
+  --cor-aviso-clara: #fff3cd;
+
+  /* Neutros */
+  --cor-texto: #1f1f1f;
+  --cor-texto-suave: #666666;
+  --cor-texto-fraco: #999999;
+  --cor-borda: #e2e2e2;
+  --cor-fundo: #ffffff;
+  --cor-fundo-tela: #f5f5f5;        /* fundo cinza da tela 02 */
+  --cor-fundo-campo: #f2f2f2;       /* busca do cardápio, código Pix */
+  --cor-inativo: #e0e0e0;           /* ícones das abas inativas */
+  --cor-sobreposicao: rgba(0, 0, 0, 0.5);
+  --cor-sobre-primaria: #ffffff;
+
+  /* Tipografia */
+  --fonte-base: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --tam-xs: 12px;
+  --tam-sm: 14px;
+  --tam-md: 16px;
+  --tam-lg: 18px;
+  --tam-xl: 22px;
+  --tam-2xl: 26px;
+  --tam-3xl: 34px;
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-forte: 600;
+  --peso-titulo: 700;
+
+  /* Espaçamentos */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 20px;
+  --esp-6: 24px;
+  --esp-8: 32px;
+
+  /* Formas */
+  --raio-sm: 8px;
+  --raio-md: 12px;
+  --raio-lg: 16px;
+  --raio-pilula: 999px;
+  --sombra-cartao: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sombra-flutuante: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  /* Layout (ERS 3.1: celular 390x844 como prioridade) */
+  --largura-app: 430px;
+  --altura-barra-nav: 64px;
+  --altura-botao: 48px;
+}

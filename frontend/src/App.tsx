@@ -1,68 +1,64 @@
-// ESBOÇO-PROVISÓRIO: página de teste de integração front-end ↔ API ↔ banco (AGENTS.md, seção 7).
-// Remover quando as telas reais (ERS, seção 3.1) começarem a ser implementadas.
-import { FormEvent, useEffect, useState } from "react";
-import { api, Recado } from "./api";
+// Escolhe a tela pela rota (#/...). Telas que precisam de login (RN-01) mandam
+// o visitante para "Entrar" e voltam para onde ele estava.
+import { useEffect } from "react";
+import { Carregando } from "./componentes";
+import { ProvedorCarrinho } from "./contextos/Carrinho";
+import { ProvedorSessao, useSessao } from "./contextos/Sessao";
+import { caminhoDe, ir, Rota, useRota } from "./navegacao";
+import Cadastro from "./paginas/Cadastro";
+import Cardapio from "./paginas/Cardapio";
+import Checkout from "./paginas/Checkout";
+import DetalheItem from "./paginas/DetalheItem";
+import EmBreve from "./paginas/EmBreve";
+import Entrar from "./paginas/Entrar";
+import Inicio from "./paginas/Inicio";
+import PedidoRecebido from "./paginas/PedidoRecebido";
+import Sacola from "./paginas/Sacola";
 
-export default function App() {
-  const [status, setStatus] = useState("verificando…");
-  const [recados, setRecados] = useState<Recado[]>([]);
-  const [texto, setTexto] = useState("");
-  const [erro, setErro] = useState("");
+const EXIGEM_LOGIN: Rota["tela"][] = ["sacola", "checkout", "pedido-recebido"];
 
-  async function carregar() {
-    try {
-      setStatus((await api.health()).status);
-      setRecados(await api.listarRecados());
-      setErro("");
-    } catch (e) {
-      setStatus("fora do ar");
-      setErro(String(e));
-    }
-  }
+function Telas() {
+  const rota = useRota();
+  const { cliente, carregando } = useSessao();
+  const bloqueada = EXIGEM_LOGIN.includes(rota.tela) && !cliente;
 
   useEffect(() => {
-    carregar();
-  }, []);
+    if (!carregando && bloqueada) ir({ tela: "entrar", depois: caminhoDe(rota).slice(1) }, { substituir: true });
+  }, [carregando, bloqueada, rota]);
 
-  async function enviar(ev: FormEvent) {
-    ev.preventDefault();
-    if (!texto.trim()) return;
-    try {
-      await api.criarRecado(texto.trim());
-      setTexto("");
-      await carregar();
-    } catch (e) {
-      setErro(String(e));
-    }
+  if (carregando || bloqueada) return <div className="tela"><Carregando /></div>;
+
+  switch (rota.tela) {
+    case "entrar":
+      return <Entrar depois={rota.depois} />;
+    case "cadastro":
+      return <Cadastro />;
+    case "cardapio":
+      return <Cardapio />;
+    case "item":
+      return <DetalheItem key={rota.produtoId} produtoId={rota.produtoId} />;
+    case "sacola":
+      return <Sacola />;
+    case "checkout":
+      return <Checkout />;
+    case "pedido-recebido":
+      return <PedidoRecebido pedidoId={rota.pedidoId} />;
+    case "pedidos":
+    case "fidelidade":
+      return <EmBreve aba={rota.tela} />;
+    default:
+      return <Inicio />;
   }
+}
 
+export default function App() {
   return (
-    <main className="pagina">
-      <h1>BurguerJá</h1>
-      <p className="subtitulo">Teste de integração: front-end → API → banco</p>
-
-      <p className={`status ${status === "ok" ? "ok" : "falha"}`}>API: {status}</p>
-
-      <form onSubmit={enviar} className="form">
-        <input
-          value={texto}
-          onChange={(e) => setTexto(e.target.value)}
-          placeholder="Escreva um recado"
-          maxLength={200}
-        />
-        <button type="submit">Salvar</button>
-      </form>
-      {erro && <p className="erro">{erro}</p>}
-
-      <ul className="lista">
-        {recados.map((r) => (
-          <li key={r.id}>
-            <span>{r.texto}</span>
-            <small>{r.criado_em}</small>
-          </li>
-        ))}
-        {recados.length === 0 && <li className="vazio">Nenhum recado salvo ainda.</li>}
-      </ul>
-    </main>
+    <ProvedorSessao>
+      <ProvedorCarrinho>
+        <div className="app">
+          <Telas />
+        </div>
+      </ProvedorCarrinho>
+    </ProvedorSessao>
   );
 }

@@ -15,7 +15,12 @@ def caminho_banco() -> Path:
 
 
 def conectar() -> sqlite3.Connection:
-    conn = sqlite3.connect(caminho_banco())
+    # check_same_thread=False: o FastAPI abre a conexão (dependência `conexao`)
+    # numa thread e roda a rota em outra. Com o padrão (True), a rota falhava com
+    # ProgrammingError, o rollback também falhava, a transação ficava aberta e as
+    # requisições seguintes recebiam "database is locked" (erro 500). Cada
+    # conexão continua sendo usada por uma requisição só.
+    conn = sqlite3.connect(caminho_banco(), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn

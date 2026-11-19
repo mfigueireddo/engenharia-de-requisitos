@@ -4,10 +4,6 @@ Este arquivo vale para **qualquer** agente de IA que trabalhe neste repositório
 (Claude Code, Codex, Cursor, Copilot, Gemini CLI etc.). O `CLAUDE.md` importa
 este arquivo; regras novas entram **aqui**, não lá.
 
-> ⚠️ **Lembrete — esboço provisório:** a tabela `recado`, as rotas `/api/recados`
-> e a página atual do front-end são só um teste de integração. Quem entregar a
-> **primeira funcionalidade real** da ERS deve removê-los no mesmo PR (ver seção 7).
-
 ## 1. O projeto
 
 **BurguerJá** — aplicativo web de pedidos para uma rede de fast-food, projeto da
@@ -135,20 +131,3 @@ Não existe CI: a revisão humana e os testes locais são a única barreira ante
   testes de novo se houve mudanças.
 - Agentes de IA: crie o branch e faça commits nele; **abra o PR só se o humano
   pedir**, e nunca faça merge.
-
-## 7. Esboço provisório a remover
-
-O esqueleto atual tem um exemplo de integração que **não faz parte do produto**.
-No PR da primeira funcionalidade real da ERS (que já exercite banco → API →
-front-end), remova:
-
-- a tabela `recado` em `backend/app/schema.sql`;
-- o arquivo `backend/app/routers/recados.py` (classes `RecadoEntrada`/`Recado` e rotas
-  `/api/recados`) e o `include_router(recados.router)` em `backend/app/main.py`
-  (mantenha `/api/health`, em `routers/saude.py`);
-- o arquivo `backend/tests/test_api.py` (testes de recados; substitua por testes reais);
-- `Recado`, `listarRecados` e `criarRecado` em `frontend/src/api.ts`;
-- a página de teste em `frontend/src/App.tsx` e os estilos que só ela usa;
-- a regra 7 de `ESTRUTURA.md`, este item 7 e o lembrete no topo deste arquivo.
-
-Todos esses trechos estão marcados no código com `ESBOÇO-PROVISÓRIO`.

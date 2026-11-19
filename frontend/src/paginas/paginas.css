@@ -1,0 +1,86 @@
+/* Estilos específicos das telas. Só variáveis de estilos/tema.css. */
+
+/* Tela 01 – Entrar */
+.pagina-acesso { align-items: stretch; padding-top: var(--esp-8); gap: var(--esp-3); }
+.pagina-acesso .logo { align-self: center; margin-top: var(--esp-6); }
+.pagina-acesso__titulo { text-align: center; font-size: var(--tam-2xl); font-weight: var(--peso-titulo); margin-top: var(--esp-4); }
+.pagina-acesso__subtitulo { text-align: center; color: var(--cor-texto-suave); margin-bottom: var(--esp-3); }
+.pagina-acesso__rodape { text-align: center; color: var(--cor-texto-suave); font-size: var(--tam-sm); margin-top: auto; padding-top: var(--esp-6); }
+
+/* Tela 02 – Início */
+.cabecalho-marca {
+  background: var(--cor-primaria); color: var(--cor-sobre-primaria);
+  padding: var(--esp-6) var(--esp-5) var(--esp-5);
+}
+.cabecalho-marca__sobre { font-size: var(--tam-sm); opacity: .9; }
+.cabecalho-marca__titulo { font-size: var(--tam-2xl); font-weight: var(--peso-titulo); margin-top: var(--esp-1); }
+.cabecalho-marca__link { color: var(--cor-sobre-primaria); font-size: var(--tam-sm); font-weight: var(--peso-forte); display: inline-block; margin-top: var(--esp-2); }
+.banner { background: var(--cor-destaque); border-radius: var(--raio-lg); padding: var(--esp-4); }
+.banner__sobre { color: var(--cor-primaria); font-size: var(--tam-xs); font-weight: var(--peso-titulo); }
+.banner__titulo { font-size: var(--tam-lg); font-weight: var(--peso-titulo); margin: var(--esp-1) 0; }
+.banner__texto { font-size: var(--tam-sm); }
+.linha-unidade { display: flex; gap: var(--esp-3); align-items: center; }
+.linha-unidade__icone {
+  width: 52px; height: 52px; flex-shrink: 0; border-radius: var(--raio-md);
+  background: var(--cor-foto); color: var(--cor-foto-texto);
+  display: flex; align-items: center; justify-content: center;
+}
+.linha-unidade__texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.linha-unidade__selos { display: flex; gap: var(--esp-1); margin-top: var(--esp-1); }
+.linha-unidade__selos:empty { display: none; }
+.tela--cinza .tela__conteudo { padding-bottom: calc(var(--altura-botao) + var(--esp-8)); }
+
+/* Tela 04 – Cardápio */
+.busca {
+  display: flex; align-items: center; gap: var(--esp-2);
+  background: var(--cor-fundo-campo); border-radius: var(--raio-pilula);
+  padding: 0 var(--esp-4); color: var(--cor-texto-fraco);
+}
+.busca input { flex: 1; border: 0; background: none; min-height: 44px; color: var(--cor-texto); }
+.busca input:focus { outline: none; }
+.chips { display: flex; gap: var(--esp-2); overflow-x: auto; margin: 0 calc(-1 * var(--esp-4)); padding: 0 var(--esp-4) 2px; scrollbar-width: none; }
+.chip {
+  border: 0; border-radius: var(--raio-pilula); padding: var(--esp-2) var(--esp-4);
+  background: var(--cor-fundo-campo); font-size: var(--tam-sm); font-weight: var(--peso-forte); white-space: nowrap;
+}
+.chip--ativo { background: var(--cor-primaria); color: var(--cor-sobre-primaria); }
+.grade-produtos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--esp-3); padding-bottom: var(--esp-8); }
+.cartao-produto { display: flex; flex-direction: column; gap: var(--esp-2); padding: var(--esp-3); }
+.cartao-produto__nome { font-size: var(--tam-sm); }
+
+/* Tela 05 – Detalhe do item */
+.detalhe__foto { height: 260px; position: relative; }
+.detalhe__voltar {
+  position: absolute; top: var(--esp-4); left: var(--esp-4); z-index: 1;
+  width: 40px; height: 40px; border-radius: 50%; border: 0;
+  background: var(--cor-fundo); box-shadow: var(--sombra-flutuante);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.detalhe__nome { font-size: var(--tam-2xl); font-weight: var(--peso-titulo); margin: var(--esp-2) 0; }
+.detalhe__preco { display: flex; align-items: center; gap: var(--esp-2); margin-top: var(--esp-2); }
+.lista-componentes { margin: 0; padding-left: var(--esp-5); color: var(--cor-texto-suave); font-size: var(--tam-sm); }
+
+/* Tela 06 – Sacola */
+.item-sacola { display: flex; gap: var(--esp-3); align-items: flex-start; }
+.item-sacola--ocupado { opacity: .6; }
+.item-sacola__meio { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--esp-1); }
+.item-sacola__valor { white-space: nowrap; }
+.item-sacola__obs {
+  border: 0; background: none; padding: 0; text-align: left;
+  font-size: var(--tam-xs); color: var(--cor-texto-suave); text-decoration: underline dotted;
+}
+.item-sacola__obs-edicao { display: flex; gap: var(--esp-1); align-items: center; }
+
+/* Finalizar pedido e Pedido recebido */
+.lista-resumo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--esp-2); font-size: var(--tam-sm); }
+.lista-resumo li { display: flex; justify-content: space-between; gap: var(--esp-3); }
+.lista-resumo li > span:last-child { font-weight: var(--peso-forte); white-space: nowrap; }
+.pagina-sucesso { align-items: center; text-align: center; padding-top: var(--esp-8); }
+.pagina-sucesso__icone {
+  width: 96px; height: 96px; border-radius: 50%; margin-top: var(--esp-6);
+  background: var(--cor-sucesso-forte); color: var(--cor-sobre-primaria);
+  display: flex; align-items: center; justify-content: center;
+}
+.pagina-sucesso__titulo { font-size: var(--tam-2xl); font-weight: var(--peso-titulo); }
+.pagina-sucesso__resumo { width: 100%; text-align: left; display: flex; flex-direction: column; gap: var(--esp-3); }
+.pagina-sucesso .aviso { text-align: left; width: 100%; }
