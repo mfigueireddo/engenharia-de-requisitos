@@ -50,14 +50,30 @@ depois faca um resumo sobre o estado atual do backend/frontend, comparando com o
 
 **Arquivos alterados:** os dois documentos acima, este registro, `docs/ia/INDICE.md`.
 
-**Decisão humana:** <pendente>
+**Decisão humana:** aceito — o humano pediu o PR sem pedir ajustes (interação 2).
+
+### 2
+
+**Prompt (literal):**
+
+```text
+cria o pr
+```
+
+**Saída (resumo):** conferiu que a `main` não tinha commits novos, atualizou
+este registro e o transcript, fez commit e push e abriu o PR para a `main` com o
+modelo de `.github/pull_request_template.md`.
+
+**Arquivos alterados:** este registro, transcript.
+
+**Decisão humana:** aceito (pedido direto do humano).
 
 ## Resultado
 
 - **Entregue:** resumo de uma página das contribuições e relatório do estado atual × ERS × diagrama.
 - **Testes:** `pytest` 131 passed; `npm run build` ok (só verificação, nenhum código alterado).
 - **Problemas da IA:** nenhum. O nome "Paulo" não aparece no `git log`; foi identificado pelo campo "Autor (humano)" do registro de 18/11.
-- **Pendências:** o humano revisar os dois documentos.
+- **Pendências:** revisão do PR por outro integrante.
 
 ## Reflexão
 
