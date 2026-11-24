@@ -5,7 +5,8 @@
 // - A1: retirada/drive-thru sem endereço nem taxa. E1: carrinho vazio (RF-07).
 // - E2: endereço fora do raio (RF-06): aviso junto ao endereço e não deixa confirmar.
 // - Passos 8–9: total e confirmação; o servidor recalcula e exige o mesmo total (RNF-26).
-// A2 (novo endereço) depende do UC33 e A3 (cupom) do UC30, ainda não implementados.
+// - A3 (cupom): executa Aplicar Cupom ao Pedido (UC30, tela 07) e atualiza o total.
+// A2 (novo endereço) depende do UC33, ainda não implementado.
 import { useEffect, useState } from "react";
 import { api, Endereco, ErroApi, Previa, TipoAtendimento } from "../api";
 import {
@@ -14,6 +15,7 @@ import {
 import { useCarrinho } from "../contextos/Carrinho";
 import { distancia, enderecoCurto, NOME_ATENDIMENTO, reais } from "../formatar";
 import { ir } from "../navegacao";
+import { lerCupomSelecionado, salvarCupomSelecionado } from "./Cupons";
 import { guardarPedido } from "./PedidoRecebido";
 
 const DESCRICAO_ATENDIMENTO: Record<TipoAtendimento, string> = {
@@ -31,6 +33,8 @@ export default function Checkout() {
   const [tipo, setTipo] = useState<TipoAtendimento | null>(null);
   const [enderecos, setEnderecos] = useState<Endereco[] | null>(null);
   const [enderecoId, setEnderecoId] = useState<number | null>(null);
+  const [codigoCupom, setCodigoCupom] = useState<string | null>(() => lerCupomSelecionado());
+  const [erroCupom, setErroCupom] = useState<string | null>(null);
   const [erroInicial, setErroInicial] = useState<Erro | null>(null);
   const [erroEscolha, setErroEscolha] = useState<Erro | null>(null);
   const [calculando, setCalculando] = useState(false);
@@ -39,19 +43,46 @@ export default function Checkout() {
 
   // Passos 1–3: a retirada existe em toda unidade, então serve para obter o resumo e as opções.
   useEffect(() => {
-    api.previa("RETIRADA", null).then(setBase).catch((e) =>
-      setErroInicial(e instanceof ErroApi ? { mensagem: e.message, motivo: e.motivo } : { mensagem: String(e) }));
+    api.previa("RETIRADA", null, codigoCupom)
+      .then(setBase)
+      .catch(async (e) => {
+        if (e instanceof ErroApi && codigoCupom && e.motivo?.startsWith("cupom_")) {
+          // Se o cupom salvo na sessão ficou inválido (ex.: subtotal diminuiu), remove e carrega sem cupom
+          setErroCupom(e.message);
+          setCodigoCupom(null);
+          salvarCupomSelecionado(null);
+          try {
+            setBase(await api.previa("RETIRADA", null, null));
+            return;
+          } catch (e2) {
+            e = e2;
+          }
+        }
+        setErroInicial(e instanceof ErroApi ? { mensagem: e.message, motivo: e.motivo } : { mensagem: String(e) });
+      });
   }, []);
 
-  async function calcular(t: TipoAtendimento, endereco: number | null) {
+  async function calcular(t: TipoAtendimento, endereco: number | null, cupom: string | null = codigoCupom) {
     setPrevia(null);
     setErroEscolha(null);
+    setErroCupom(null);
     if (t === "ENTREGA" && endereco === null) return;
     setCalculando(true);
     try {
-      setPrevia(await api.previa(t, endereco));
+      setPrevia(await api.previa(t, endereco, cupom));
     } catch (e) {
-      setErroEscolha(e instanceof ErroApi ? { mensagem: e.message, motivo: e.motivo } : { mensagem: String(e) });
+      if (e instanceof ErroApi && cupom && e.motivo?.startsWith("cupom_")) {
+        setErroCupom(e.message);
+        setCodigoCupom(null);
+        salvarCupomSelecionado(null);
+        try {
+          setPrevia(await api.previa(t, endereco, null));
+        } catch (e2) {
+          setErroEscolha(e2 instanceof ErroApi ? { mensagem: e2.message, motivo: e2.motivo } : { mensagem: String(e2) });
+        }
+      } else {
+        setErroEscolha(e instanceof ErroApi ? { mensagem: e.message, motivo: e.motivo } : { mensagem: String(e) });
+      }
     } finally {
       setCalculando(false);
     }
@@ -72,12 +103,29 @@ export default function Checkout() {
     calcular("ENTREGA", id);
   }
 
+  function removerCupom() {
+    setCodigoCupom(null);
+    setErroCupom(null);
+    salvarCupomSelecionado(null);
+    if (tipo) {
+      calcular(tipo, tipo === "ENTREGA" ? enderecoId : null, null);
+    } else {
+      api.previa("RETIRADA", null, null).then(setBase).catch(() => null);
+    }
+  }
+
   async function confirmar() {
     if (!previa || !tipo) return;
     setConfirmando(true);
     setErroEscolha(null);
     try {
-      const pedido = await api.confirmarPedido(tipo, tipo === "ENTREGA" ? enderecoId : null, previa.total_centavos);
+      const pedido = await api.confirmarPedido(
+        tipo,
+        tipo === "ENTREGA" ? enderecoId : null,
+        previa.total_centavos,
+        codigoCupom,
+      );
+      salvarCupomSelecionado(null);
       guardarPedido(pedido, previa.carrinho.unidade?.nome ?? "");
       await recarregarCarrinho().catch(() => null);
       ir({ tela: "pedido-recebido", pedidoId: pedido.id }, { substituir: true });
@@ -110,17 +158,31 @@ export default function Checkout() {
   if (!base) return <Tela titulo="Finalizar pedido"><Carregando /></Tela>;
 
   const carrinho = (previa ?? base).carrinho;
+  const cupomAtual = (previa ?? base).cupom;
   const pronto = previa !== null && !calculando && previa.tipo_atendimento === tipo;
   const linhas = previa
     ? [
         { rotulo: "Subtotal", centavos: previa.subtotal_centavos },
-        ...(previa.tipo_atendimento === "ENTREGA" ? [{ rotulo: "Taxa de entrega", centavos: previa.taxa_entrega_centavos }] : []),
+        ...(previa.tipo_atendimento === "ENTREGA"
+          ? [
+              {
+                rotulo: "Taxa de entrega",
+                centavos: previa.taxa_entrega_centavos,
+                texto: previa.cupom?.isenta_taxa_entrega ? "Grátis (cupom)" : undefined,
+              },
+            ]
+          : []),
         ...(previa.desconto_cupom_centavos > 0
-          ? [{ rotulo: "Desconto (cupom)", centavos: previa.desconto_cupom_centavos, negativo: true }]
+          ? [{ rotulo: `Desconto (${previa.cupom?.codigo ?? "cupom"})`, centavos: previa.desconto_cupom_centavos, negativo: true }]
           : []),
         { rotulo: "Total", centavos: previa.total_centavos, destaque: true },
       ]
-    : [{ rotulo: "Subtotal", centavos: base.subtotal_centavos }];
+    : [
+        { rotulo: "Subtotal", centavos: base.subtotal_centavos },
+        ...(base.desconto_cupom_centavos > 0
+          ? [{ rotulo: `Desconto (${base.cupom?.codigo ?? "cupom"})`, centavos: base.desconto_cupom_centavos, negativo: true }]
+          : []),
+      ];
 
   return (
     <Tela titulo="Finalizar pedido" subtitulo={carrinho.unidade?.nome} aoVoltar={() => ir({ tela: "sacola" })}
@@ -184,6 +246,33 @@ export default function Checkout() {
       ) : null}
 
       {tipo !== "ENTREGA" && erroEscolha ? <Aviso tom="erro">{erroEscolha.mensagem}</Aviso> : null}
+
+      {/* A3 / UC30: Aplicar cupom ao pedido */}
+      <section className="pilha">
+        <h2 className="titulo-secao">Cupom de desconto</h2>
+        {erroCupom ? <Aviso tom="erro">{erroCupom}</Aviso> : null}
+        {cupomAtual ? (
+          <Cartao className="linha-cupom">
+            <div className="linha-cupom__texto">
+              <strong>{cupomAtual.codigo}</strong>
+              <span className="texto-suave">
+                {cupomAtual.desconto_cupom_centavos > 0
+                  ? `– ${reais(cupomAtual.desconto_cupom_centavos)} nos itens`
+                  : "Entrega grátis"}
+                {cupomAtual.desconto_cupom_centavos > 0 && cupomAtual.isenta_taxa_entrega ? " + entrega grátis" : ""}
+              </span>
+            </div>
+            <div className="linha-cupom__acoes">
+              <Botao variante="texto" onClick={() => ir({ tela: "cupons" })}>Trocar</Botao>
+              <Botao variante="texto" onClick={removerCupom}>Remover</Botao>
+            </div>
+          </Cartao>
+        ) : (
+          <Botao variante="contorno" largo onClick={() => ir({ tela: "cupons" })}>
+            Aplicar cupom
+          </Botao>
+        )}
+      </section>
 
       {/* Passos 7–8: tempo estimado e total */}
       <section className="pilha">

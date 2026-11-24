@@ -9,6 +9,7 @@ export type Rota =
   | { tela: "cardapio" }
   | { tela: "item"; produtoId: number }
   | { tela: "sacola" }
+  | { tela: "cupons" }
   | { tela: "checkout" }
   | { tela: "pedido-recebido"; pedidoId: number }
   | { tela: "pedidos" }
@@ -29,6 +30,8 @@ export function lerRota(hash: string = window.location.hash): Rota {
       return Number(partes[1]) ? { tela: "item", produtoId: Number(partes[1]) } : { tela: "cardapio" };
     case "sacola":
       return { tela: "sacola" };
+    case "cupons":
+      return { tela: "cupons" };
     case "checkout":
       return { tela: "checkout" };
     case "pedido-recebido":

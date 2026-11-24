@@ -71,6 +71,23 @@
 }
 .item-sacola__obs-edicao { display: flex; gap: var(--esp-1); align-items: center; }
 
+/* Tela 07 – Aplicar cupom (UC30) */
+.cupom-entrada { display: flex; gap: var(--esp-2); align-items: stretch; }
+.cupom-entrada .campo__entrada { flex: 1; }
+.cartao-cupom { display: flex; gap: var(--esp-3); align-items: center; }
+.cartao-cupom__selo {
+  width: 56px; height: 56px; flex-shrink: 0; border-radius: var(--raio-md);
+  background: var(--cor-destaque); color: var(--cor-destaque-texto);
+  font-size: var(--tam-sm); font-weight: var(--peso-titulo);
+  display: flex; align-items: center; justify-content: center;
+}
+.cartao-cupom__meio { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cartao-cupom__codigo { font-size: var(--tam-md); font-weight: var(--peso-titulo); }
+.cartao-cupom__descricao { font-size: var(--tam-xs); color: var(--cor-texto-suave); }
+.linha-cupom { display: flex; align-items: center; justify-content: space-between; gap: var(--esp-2); }
+.linha-cupom__texto { display: flex; flex-direction: column; gap: 2px; font-size: var(--tam-sm); }
+.linha-cupom__acoes { display: flex; gap: var(--esp-1); }
+
 /* Finalizar pedido e Pedido recebido */
 .lista-resumo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--esp-2); font-size: var(--tam-sm); }
 .lista-resumo li { display: flex; justify-content: space-between; gap: var(--esp-3); }

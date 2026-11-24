@@ -5,7 +5,7 @@
 // - E1: carrinho vazio, com opção de voltar ao cardápio.
 // - E2: item fora do cardápio — o servidor retira e manda um aviso.
 // - E3: SGL fora do ar — mostra o horário do último cardápio (RNF-03).
-// O cupom (UC30) entra nesta tela quando for implementado.
+// - UC30: permite abrir a tela 07 (Cupons) ou ir para Finalizar pedido.
 import { useState } from "react";
 import { api, Carrinho, ErroApi, ItemCarrinho } from "../api";
 import {
@@ -15,6 +15,7 @@ import { useCarrinho } from "../contextos/Carrinho";
 import { dataHora, reais } from "../formatar";
 import { ir } from "../navegacao";
 import { useCarregar } from "../useCarregar";
+import { lerCupomSelecionado } from "./Cupons";
 
 export default function Sacola() {
   const { atualizar } = useCarrinho();
@@ -89,6 +90,10 @@ export default function Sacola() {
         <ResumoValores linhas={[{ rotulo: "Subtotal", centavos: carrinho.subtotal_centavos, destaque: true }]} />
         <p className="texto-fraco">Taxa de entrega e total são calculados ao finalizar o pedido.</p>
       </Cartao>
+
+      <Botao variante="contorno" largo onClick={() => ir({ tela: "cupons" })}>
+        {lerCupomSelecionado() ? `Cupom selecionado: ${lerCupomSelecionado()}` : "Aplicar cupom de desconto"}
+      </Botao>
 
       <Botao variante="texto" largo onClick={() => setConfirmarEsvaziar(true)}>Esvaziar sacola</Botao>
       <Folha aberta={confirmarEsvaziar} aoFechar={() => setConfirmarEsvaziar(false)} titulo="Esvaziar a sacola?">

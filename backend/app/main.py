@@ -1,36 +1,28 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Optional
-from app import enderecos as repo
+"""Ponto de entrada da API do BurguerJá (FastAPI).
 
-app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allow_methods=["*"], allow_headers=["*"])
+Aqui só se cria o app e se registram os routers; as rotas ficam em app/routers/.
+"""
 
-class EnderecoIn(BaseModel):
-    cep: str = ""
-    rua: str = ""
-    numero: str = ""
-    complemento: Optional[str] = ""
-    bairro: str = ""
-    cidade: str = ""
+from contextlib import asynccontextmanager
 
-@app.get("/enderecos")
-def listar_enderecos(): return repo.listar()
+from fastapi import FastAPI
 
-@app.post("/enderecos", status_code=201)
-def criar_endereco(dados: EnderecoIn):
-    try: return repo.criar(dados.model_dump())
-    except ValueError as e: raise HTTPException(status_code=422, detail=str(e))
+from . import db
+from .routers import auth, carrinho, cupons, enderecos, pedidos, saude, unidades
 
-@app.put("/enderecos/{endereco_id}")
-def editar_endereco(endereco_id: int, dados: EnderecoIn):
-    try: return repo.editar(endereco_id, dados.model_dump())
-    except ValueError as e: raise HTTPException(status_code=422, detail=str(e))
-    except LookupError as e: raise HTTPException(status_code=404, detail=str(e))
 
-@app.delete("/enderecos/{endereco_id}", status_code=204)
-def remover_endereco(endereco_id: int):
-    try: repo.remover(endereco_id)
-    except LookupError as e: raise HTTPException(status_code=404, detail=str(e))
-    return None
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    db.inicializar()
+    yield
+
+
+app = FastAPI(title="BurguerJá API", lifespan=lifespan)
+
+app.include_router(saude.router)
+app.include_router(auth.router)
+app.include_router(unidades.router)
+app.include_router(carrinho.router)
+app.include_router(cupons.router)
+app.include_router(enderecos.router)
+app.include_router(pedidos.router)
