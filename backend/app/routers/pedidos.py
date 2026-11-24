@@ -26,6 +26,7 @@ router = APIRouter(prefix="/api/pedidos", tags=["finalizar pedido (UC28)"])
 class EscolhaEntrada(BaseModel):
     tipo_atendimento: Literal["ENTREGA", "RETIRADA", "DRIVE_THRU"]
     endereco_id: int | None = None
+    codigo_cupom: str | None = None
 
 
 class ConfirmacaoEntrada(EscolhaEntrada):
@@ -42,13 +43,13 @@ def _executar(funcao, *args):
 @router.post("/previa")
 def previa(entrada: EscolhaEntrada, cliente=Depends(seguranca.cliente_atual),
            conn: sqlite3.Connection = Depends(seguranca.conexao)):
-    escolha = checkout.Escolha(entrada.tipo_atendimento, entrada.endereco_id)
+    escolha = checkout.Escolha(entrada.tipo_atendimento, entrada.endereco_id, entrada.codigo_cupom)
     return _executar(checkout.calcular, conn, cliente["id"], escolha)
 
 
 @router.post("", status_code=201)
 def confirmar(entrada: ConfirmacaoEntrada, cliente=Depends(seguranca.cliente_atual),
               conn: sqlite3.Connection = Depends(seguranca.conexao)):
-    escolha = checkout.Escolha(entrada.tipo_atendimento, entrada.endereco_id)
+    escolha = checkout.Escolha(entrada.tipo_atendimento, entrada.endereco_id, entrada.codigo_cupom)
     pedido_id = _executar(checkout.confirmar, conn, cliente["id"], escolha, entrada.total_centavos)
     return checkout.pedido_publico(conn, pedido_id)

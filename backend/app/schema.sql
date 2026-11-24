@@ -7,8 +7,12 @@
 -- - ENUM e BOOLEAN não existem no SQLite: CHECK (... IN ...) e INTEGER 0/1.
 -- - Colunas a mais, marcadas "extra" abaixo, que o diagrama não tem mas a ERS ou
 --   uma decisão do grupo exigem (sessão, bloqueio de login, cache do SGL...).
--- - Tabelas de pagamento, cartão salvo, cupom e fidelidade ainda não existem:
+-- - Tabelas de pagamento, cartão salvo e fidelidade ainda não existem:
 --   entram com os casos de uso delas (decisão do grupo em 2026-11-19).
+-- - CUPOM_PROMOCIONAL (UC30): percentual_desconto DECIMAL(5,2) virou
+--   percentual_desconto_centesimos INTEGER (1000 = 10,00%), para as contas de
+--   dinheiro não usarem float (RNF-23); as datas de validade são texto
+--   AAAA-MM-DD no horário de Brasília (RNF-24).
 --
 -- ON DELETE segue o diagrama: CASCADE em composições, heranças e associativas;
 -- RESTRICT (padrão) nas demais FKs.
@@ -175,9 +179,10 @@ CREATE TABLE IF NOT EXISTS carrinho (
 );
 
 -- ===========================================================================
--- PEDIDO (UC28). Pagamento, cupom e fidelidade entram com os UCs deles.
+-- PEDIDO (UC28). Pagamento e fidelidade entram com os UCs deles.
 -- Totais não são colunas: subtotal = soma de ITEM_PEDIDO.valor_final;
--- total = subtotal − cupom + taxa (UC28 passo 8).
+-- total = subtotal − cupom (USO_CUPOM.valor_descontado) + taxa (UC28 passo 8).
+-- Cupom que isenta a taxa grava taxa_entrega_centavos = 0 (UC30 passo 4).
 -- ===========================================================================
 CREATE TABLE IF NOT EXISTS pedido (
     id                    INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -280,4 +285,66 @@ CREATE TRIGGER IF NOT EXISTS notificacao_nunca_apagada
 BEFORE DELETE ON notificacao
 BEGIN
     SELECT RAISE(ABORT, 'notificação não pode ser apagada (RNF-22)');
+END;
+
+-- ===========================================================================
+-- CUPONS PROMOCIONAIS (UC30, RF-14 a RF-18, RN-07).
+-- ===========================================================================
+-- Cada cupom pertence a um único cliente (RF-15: UNIQUE(cliente_id, codigo)).
+-- percentual_desconto_centesimos: 1000 = 10,00% (inteiro, sem float, RNF-23).
+-- valor_maximo_desconto_centavos: teto opcional em centavos (NULL = sem teto).
+CREATE TABLE IF NOT EXISTS cupom_promocional (
+    id                             INTEGER PRIMARY KEY AUTOINCREMENT,
+    cliente_id                     INTEGER NOT NULL REFERENCES cliente(id) ON DELETE CASCADE,
+    codigo                         TEXT    NOT NULL COLLATE NOCASE CHECK (length(trim(codigo)) > 0),
+    descricao                      TEXT    NOT NULL DEFAULT '',
+    percentual_desconto_centesimos INTEGER NOT NULL DEFAULT 0
+                                   CHECK (percentual_desconto_centesimos BETWEEN 0 AND 10000),
+    valor_maximo_desconto_centavos INTEGER CHECK (valor_maximo_desconto_centavos IS NULL
+                                                  OR valor_maximo_desconto_centavos >= 0),
+    isenta_taxa_entrega            INTEGER NOT NULL DEFAULT 0 CHECK (isenta_taxa_entrega IN (0, 1)),
+    valor_minimo_pedido_centavos   INTEGER NOT NULL DEFAULT 0 CHECK (valor_minimo_pedido_centavos >= 0),
+    validade_inicio                TEXT    NOT NULL,
+    validade_fim                   TEXT    NOT NULL,
+    limite_usos                    INTEGER NOT NULL CHECK (limite_usos >= 1),
+    UNIQUE (cliente_id, codigo),                                                  -- RF-15
+    CHECK (validade_inicio <= validade_fim),
+    CHECK (percentual_desconto_centesimos > 0 OR isenta_taxa_entrega = 1)
+);
+
+-- Registro do uso do cupom quando o pedido é confirmado (UC30 passo 6, RF-17).
+-- No máximo um cupom por pedido (RF-14: pedido_id UNIQUE).
+-- Nunca apagado fisicamente (RNF-22).
+CREATE TABLE IF NOT EXISTS uso_cupom (
+    id                        INTEGER PRIMARY KEY AUTOINCREMENT,
+    pedido_id                 INTEGER NOT NULL UNIQUE REFERENCES pedido(id) ON DELETE CASCADE,  -- RF-14
+    cupom_id                  INTEGER NOT NULL REFERENCES cupom_promocional(id),
+    valor_descontado_centavos INTEGER NOT NULL CHECK (valor_descontado_centavos >= 0)
+);
+
+-- Trigger: o cupom usado num pedido deve pertencer ao mesmo cliente do pedido (RF-15, RN-02, RNF-13)
+-- e o número de usos em pedidos não cancelados não pode passar de limite_usos (RF-16, RF-17, RN-07).
+CREATE TRIGGER IF NOT EXISTS uso_cupom_valido
+BEFORE INSERT ON uso_cupom
+BEGIN
+    SELECT CASE
+        WHEN (SELECT cliente_id FROM cupom_promocional WHERE id = NEW.cupom_id)
+             <> (SELECT cliente_id FROM pedido WHERE id = NEW.pedido_id)
+        THEN RAISE(ABORT, 'cupom não pertence ao cliente do pedido (RF-15)')
+        WHEN (
+            SELECT COUNT(*)
+              FROM uso_cupom u
+              JOIN pedido p ON p.id = u.pedido_id
+             WHERE u.cupom_id = NEW.cupom_id
+               AND p.status <> 'CANCELADO'
+        ) >= (SELECT limite_usos FROM cupom_promocional WHERE id = NEW.cupom_id)
+        THEN RAISE(ABORT, 'limite de usos do cupom atingido (RF-16)')
+    END;
+END;
+
+-- RNF-22: usos de cupom nunca são apagados fisicamente.
+CREATE TRIGGER IF NOT EXISTS uso_cupom_nunca_apagado
+BEFORE DELETE ON uso_cupom
+BEGIN
+    SELECT RAISE(ABORT, 'uso de cupom não pode ser apagado (RNF-22)');
 END;

@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from . import db
-from .routers import auth, carrinho, enderecos, pedidos, saude, unidades
+from .routers import auth, carrinho, cupons, enderecos, pedidos, saude, unidades
 
 
 @asynccontextmanager
@@ -23,5 +23,6 @@ app.include_router(saude.router)
 app.include_router(auth.router)
 app.include_router(unidades.router)
 app.include_router(carrinho.router)
+app.include_router(cupons.router)
 app.include_router(enderecos.router)
 app.include_router(pedidos.router)
