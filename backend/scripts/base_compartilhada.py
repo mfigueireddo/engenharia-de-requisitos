@@ -13,18 +13,20 @@ pedido), então passam pelas mesmas regras de negócio do app. Só os endereços
 são gravados direto no banco, porque o cadastro de endereços pela API é o UC33.
 
 Clientes (todos com a senha demo1234):
-- demo@burguerja.com  — o cliente de scripts/dados_demo.py (endereços da PUC e do Jardim Botânico).
-- ana@burguerja.com   — sacola pronta na Gávea, para testar o UC29 e o UC28 direto.
+- demo@burguerja.com  — o cliente de scripts/dados_demo.py (endereços da PUC e do Jardim Botânico + cupons).
+- ana@burguerja.com   — sacola pronta na Gávea e cupons do wireframe 07, para testar UC29, UC30 e UC28 direto.
 - bruno@burguerja.com — dois pedidos já feitos (entrega na Gávea e retirada na
-                        Botafogo) e um endereço perto da Botafogo.
-- carla@burguerja.com — conta nova: sem endereço, sem sacola, sem pedido.
+                        Botafogo), um endereço perto da Botafogo e cupons.
+- carla@burguerja.com — conta nova: sem endereço, sem sacola, sem pedido e sem cupom.
 """
+
+from contextlib import closing
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app import db
-from app.routers import auth, carrinho, enderecos, pedidos, unidades
+from app.routers import auth, carrinho, cupons, enderecos, pedidos, unidades
 
 from . import dados_demo
 
@@ -71,7 +73,7 @@ PEDIDOS = [
 def _api() -> FastAPI:
     """A API com as rotas usadas aqui, montada sem depender de app/main.py."""
     api = FastAPI()
-    for modulo in (auth, unidades, carrinho, enderecos, pedidos):
+    for modulo in (auth, unidades, carrinho, cupons, enderecos, pedidos):
         api.include_router(modulo.router)
     return api
 
@@ -113,7 +115,7 @@ def recriar() -> None:
         for cliente in CLIENTES:
             _ok(c.post("/api/auth/cadastro", json={**cliente, "senha": SENHA, "aceite_termos": True}), 201)
 
-        with db.conectar() as conn:
+        with closing(db.conectar()) as conn, conn:
             for email, lista in ENDERECOS.items():
                 cliente_id = conn.execute("SELECT id FROM cliente WHERE email = ?", (email,)).fetchone()["id"]
                 for e in lista:
@@ -122,6 +124,17 @@ def recriar() -> None:
                         "cidade, estado, cep) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                         (cliente_id, e["logradouro"], e["numero"], e["complemento"], e["bairro"],
                          e["cidade"], e["estado"], e["cep"]))
+                for cup in dados_demo.CUPONS:
+                    conn.execute(
+                        """INSERT INTO cupom_promocional (
+                               cliente_id, codigo, descricao, percentual_desconto_centesimos,
+                               valor_maximo_desconto_centavos, isenta_taxa_entrega,
+                               valor_minimo_pedido_centavos, validade_inicio, validade_fim, limite_usos
+                           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (cliente_id, cup["codigo"], cup["descricao"], cup["percentual_desconto_centesimos"],
+                         cup["valor_maximo_desconto_centavos"], cup["isenta_taxa_entrega"],
+                         cup["valor_minimo_pedido_centavos"], cup["validade_inicio"], cup["validade_fim"],
+                         cup["limite_usos"]))
 
         unidades_por_nome = {u["nome"]: u["id"] for u in _ok(c.get("/api/unidades"))}
 
@@ -139,7 +152,7 @@ def recriar() -> None:
         for email, unidade, itens in SACOLAS:
             _encher_sacola(c, _entrar(c, email), unidades_por_nome, unidade, itens)
 
-    with db.conectar() as conn:
+    with closing(db.conectar()) as conn, conn:
         conn.execute("DELETE FROM sessao")  # a base começa sem ninguém logado
 
     print(f"Base compartilhada recriada em {db.caminho_banco()}")

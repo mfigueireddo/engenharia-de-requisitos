@@ -20,6 +20,8 @@ def _foto(caminho) -> dict:
             "pedidos": conn.execute(
                 "SELECT id, cliente_id, unidade_id, modalidade, taxa_entrega_centavos FROM pedido "
                 "ORDER BY id").fetchall(),
+            "cupons": conn.execute(
+                "SELECT id, cliente_id, codigo FROM cupom_promocional ORDER BY id").fetchall(),
         }
     finally:
         conn.close()
@@ -40,13 +42,14 @@ def test_base_tem_os_cenarios_prometidos(banco_temporario):
     def cliente(email):
         return conn.execute("SELECT id FROM cliente WHERE email = ?", (email,)).fetchone()["id"]
 
-    # Ana: sacola com 3 itens na Gávea; nenhum pedido.
+    # Ana: sacola com 3 itens na Gávea e cupons do wireframe 07; nenhum pedido.
     ana = cliente("ana@burguerja.com")
     sacola = conn.execute(
         "SELECT COUNT(*) FROM item_pedido i JOIN carrinho c ON c.id = i.carrinho_id WHERE c.cliente_id = ?",
         (ana,)).fetchone()[0]
     assert sacola == 3
     assert conn.execute("SELECT COUNT(*) FROM pedido WHERE cliente_id = ?", (ana,)).fetchone()[0] == 0
+    assert conn.execute("SELECT COUNT(*) FROM cupom_promocional WHERE cliente_id = ?", (ana,)).fetchone()[0] == 3
 
     # Bruno: um pedido com entrega (endereço copiado, RF-05) e um de retirada sem taxa (RN-05).
     bruno = cliente("bruno@burguerja.com")

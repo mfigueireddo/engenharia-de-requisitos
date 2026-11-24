@@ -1,5 +1,6 @@
 """Acesso ao banco SQLite. Só o back-end acessa o banco (ERS 2.5, RNF-20)."""
 
+from contextlib import closing
 import os
 import sqlite3
 from pathlib import Path
@@ -35,7 +36,7 @@ def inicializar() -> None:
 
     Não há migração: um banco de desenvolvimento criado com o esquema antigo
     precisa ser apagado (ele é recriado vazio; ver README)."""
-    with conectar() as conn:
+    with closing(conectar()) as conn, conn:
         antigas = [n for (n,) in conn.execute(
             f"SELECT name FROM sqlite_master WHERE type = 'table' AND name IN "
             f"({', '.join('?' for _ in _TABELAS_ANTIGAS)})", _TABELAS_ANTIGAS)]

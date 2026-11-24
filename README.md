@@ -22,10 +22,10 @@ Senha de todos: `demo1234`.
 
 | Login | Para testar |
 |---|---|
-| `demo@burguerja.com` | Cliente básico com 2 endereços (PUC e Jardim Botânico) |
-| `ana@burguerja.com` | Sacola pronta na Gávea (UC29 e UC28 direto) |
-| `bruno@burguerja.com` | 2 pedidos já feitos e endereço perto da Botafogo |
-| `carla@burguerja.com` | Conta nova: sem endereço, sacola ou pedido |
+| `demo@burguerja.com` | Cliente básico com 2 endereços (PUC e Jardim Botânico) e 3 cupons |
+| `ana@burguerja.com` | Sacola pronta na Gávea e cupons (UC29, UC30 e UC28 direto) |
+| `bruno@burguerja.com` | 2 pedidos já feitos, endereço perto da Botafogo e cupons |
+| `carla@burguerja.com` | Conta nova: sem endereço, sacola, pedido ou cupom |
 
 ## Passo a passo (dois terminais)
 
