@@ -11,7 +11,7 @@
 | Modelo (ID exato) | claude-opus-5-5 |
 | Modo de uso | agente |
 | Branch | matheus-figueiredo/revisao-trabalho (a partir de `96e2202`, antes do commit `7250033`; ver interação 8) |
-| Commits | <preencher no fim> |
+| Commits | `3655ddc` (rodar.sh e base), `327877b` (PDF), `b1e55a2` (registro) e o commit que anota estes hashes · PR [#7](https://github.com/mfigueireddo/engenharia-de-requisitos/pull/7) |
 | Transcript | docs/ia/transcripts/2026-11-24_matheus-figueiredo_e3cefa4b-d9ed-47c4-8949-31bd3c9d493a.jsonl |
 | Sessão anterior | [resumo-progresso](2026-11-19_matheus-figueiredo_resumo-progresso.md) |
 
