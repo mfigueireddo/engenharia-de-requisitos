@@ -7,6 +7,14 @@ export function reais(centavos: number): string {
   return moeda.format(centavos / 100).replace(/ /g, " ");
 }
 
+/** "2026-10-31" → "31/10/2026" (RNF-24). */
+export function dataCurta(iso: string | null): string {
+  if (!iso) return "—";
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+  return iso;
+}
+
 /** "2026-11-19T14:05:00+00:00" → "19/11 às 11:05" (hora local). */
 export function dataHora(iso: string | null): string {
   if (!iso) return "—";

@@ -29,20 +29,22 @@ entra aqui no mesmo commit.
 │   │   │   ├── auth.py       /api/auth/*, /api/clientes/me — infra mínima (Q1)
 │   │   │   ├── unidades.py   /api/unidades e cardápio — públicas, infra mínima (Q1, Q2)
 │   │   │   ├── carrinho.py   /api/carrinho — UC29 (+ adicionar/esvaziar, infra mínima)
+│   │   │   ├── cupons.py     /api/cupons e /api/cupons/aplicar — UC30
 │   │   │   ├── enderecos.py  GET /api/enderecos — só listagem, usada pelo UC28 (CRUD = UC33)
-│   │   │   └── pedidos.py    /api/pedidos/previa e /api/pedidos — UC28
+│   │   │   └── pedidos.py    /api/pedidos/previa e /api/pedidos — UC28 (+ A3 / UC30)
 │   │   ├── servicos/         Regras de negócio (cálculos e validações), sem HTTP
 │   │   │   ├── precos.py     RF-02, RF-11
 │   │   │   ├── cardapio.py   Cache do cardápio do SGL (RF-10, RF-13, RNF-03, RNF-22)
 │   │   │   ├── carrinho.py   Carrinho recalculado (UC29, E1–E3)
-│   │   │   └── checkout.py   UC28: distância, taxa, tempo, total e confirmação
+│   │   │   ├── cupons.py     UC30: listagem, validação, desconto percentual/isento e uso
+│   │   │   └── checkout.py   UC28: distância, taxa, tempo, cupom (A3), total e confirmação
 │   │   └── integracoes/      Clientes dos sistemas externos, simulados (RNF-19)
 │   │       ├── base.py       Tempo limite + IntegracaoIndisponivel
 │   │       ├── sgl.py        Cardápio das unidades (SGL)
 │   │       ├── geocodificacao.py  CEP → latitude/longitude por tabela fixa (decisão Q8)
 │   │       └── dados_simulados/   Respostas fixas dos mocks (JSON)
 │   ├── scripts/
-│   │   └── dados_demo.py     Cliente de demonstração com endereços (só desenvolvimento; não é rota)
+│   │   └── dados_demo.py     Cliente de demonstração com endereços e cupons (só desenvolvimento; não é rota)
 │   └── tests/
 │       ├── conftest.py       Fixtures: banco SQLite temporário + TestClient
 │       ├── test_saude.py     /api/health e isolamento do banco
@@ -51,6 +53,7 @@ entra aqui no mesmo commit.
 │       ├── test_precos.py    RF-02, RF-10, RF-11
 │       ├── test_carrinho.py  UC29
 │       ├── test_checkout.py  UC28
+│       ├── test_cupons.py    UC30 (RF-14 a RF-18, RN-07)
 │       ├── test_dinheiro.py  RNF-23
 │       ├── test_integracoes.py  RNF-19 com falhas simuladas
 │       ├── test_concorrencia.py Conexão usada em outra thread (evita "database is locked")
@@ -72,7 +75,7 @@ entra aqui no mesmo commit.
 │       ├── contextos/        Estado compartilhado: Sessao.tsx (cliente, unidade) e Carrinho.tsx
 │       ├── componentes/      Componentes reutilizáveis (Botao, Campo, Cartao, Tela, Folha...) + componentes.css
 │       └── paginas/          Uma tela por arquivo (Entrar, Inicio, Cardapio, DetalheItem, Sacola,
-│                             Checkout, PedidoRecebido, EmBreve) + paginas.css
+│                             Cupons, Checkout, PedidoRecebido, EmBreve) + paginas.css
 ├── docs/
 │   ├── srs/                  ERS em Markdown (srs-pt.md) + figuras (media/)
 │   │   └── Projeto_Relacional_de_Tabelas.drawio  Modelo relacional do grupo (ERS, Ap. B.3); abrir em app.diagrams.net
@@ -138,14 +141,13 @@ entra aqui no mesmo commit.
 
 ## Crescimento previsto (sugestão, não obrigatório)
 
-Os próximos casos de uso (UC30 cupom, UC31, UC32, UC33) entram como novos arquivos
+Os próximos casos de uso (UC31, UC32, UC33) entram como novos arquivos
 em `routers/` e `servicos/`, criando no `schema.sql` as tabelas do diagrama que
-ainda faltam: CUPOM_PROMOCIONAL e USO_CUPOM (UC30, que deve preencher
-`desconto_cupom_centavos` em `servicos/checkout.py`), PAGAMENTO com
+ainda faltam: PAGAMENTO com
 PAGAMENTO_PIX/CARTAO/PONTOS e CARTAO_SALVO (Table-Per-Type, ERS 2.5) e
 PROGRAMA_FIDELIDADE, PONTOS_FIDELIDADE e CONSUMO_PONTOS (triggers de fidelidade;
 crédito quando o pedido chega a ENTREGUE, RN-11; valores do diagrama como
-provisórios do TBD-2, decisão de 2026-11-19). No front-end: o cupom entra na `Sacola`/`Checkout` (tela 07),
+provisórios do TBD-2, decisão de 2026-11-19). No front-end:
 o pagamento substitui a tela `PedidoRecebido` (telas 08–10), e o UC31 e a
 fidelidade substituem `EmBreve` (telas 11–14). O UC33 (tela 03) deve ligar o
 "novo endereço" do `Checkout` (UC28 A2). Ao fazer isso, atualize a árvore e as regras acima.

@@ -9,9 +9,11 @@ Fórmulas que a ERS deixa em aberto, decididas pelo humano na sessão
 - Tempo estimado (passo 7, RNF-06): 30 min + 3 min por km iniciado. É sempre uma
   estimativa; o front-end deve apresentá-lo assim.
 
-Cupom (A3): o UC30 é de outro integrante. O total já prevê o desconto
-(`desconto_cupom_centavos`), hoje sempre zero; o UC30 deve preenchê-lo aqui
-(no banco, pela tabela USO_CUPOM do projeto relacional).
+Cupom (A3 / UC30): `Escolha.codigo_cupom` (opcional) aplica um cupom do cliente
+via `servicos.cupons.validar_e_calcular`. O desconto percentual entra em
+`desconto_cupom_centavos` (e em `uso_cupom.valor_descontado_centavos` na
+confirmação, RF-17); se o cupom isenta a taxa de entrega, `taxa_entrega_centavos`
+passa a ser zero (UC30 passo 4).
 
 Tabelas (projeto relacional): `pedido` (modalidade, taxa, previsao_entrega),
 `endereco_pedido` (cópia do endereço, só em ENTREGA) e `item_pedido`. Subtotal
@@ -27,7 +29,7 @@ from dataclasses import dataclass
 from .. import relogio
 from ..integracoes import geocodificacao
 from ..integracoes.base import IntegracaoIndisponivel
-from . import carrinho, cardapio
+from . import carrinho, cardapio, cupons
 
 TEMPO_PREPARO_MIN = 30
 MINUTOS_POR_KM = 3
@@ -49,6 +51,7 @@ class ErroCheckout(Exception):
 class Escolha:
     tipo_atendimento: str
     endereco_id: int | None = None
+    codigo_cupom: str | None = None
 
 
 def distancia_m(lat1: float, lon1: float, lat2: float, lon2: float) -> int:
@@ -123,12 +126,25 @@ def calcular(conn: sqlite3.Connection, cliente_id: int, escolha: Escolha) -> dic
         entrega = {"endereco": _endereco_publico(end), "distancia_m": dist,
                    "tempo_estimado_min": tempo_estimado_min(dist)}
 
-    desconto_cupom = 0  # A3 / UC30: a cargo de outro integrante
+    desconto_cupom = 0
+    cupom_aplicado = None
+    if escolha.codigo_cupom and escolha.codigo_cupom.strip():  # A3 / UC30
+        try:
+            cupom_aplicado = cupons.validar_e_calcular(
+                conn, cliente_id, escolha.codigo_cupom, resumo["subtotal_centavos"]
+            )
+        except cupons.ErroCupom as e:
+            raise ErroCheckout(e.status, e.motivo, e.mensagem) from None
+        desconto_cupom = cupom_aplicado["desconto_cupom_centavos"]
+        if cupom_aplicado["isenta_taxa_entrega"]:  # UC30 passo 4: a taxa passa a ser zero
+            taxa = 0
+
     return {
         "carrinho": resumo,
         "tipos_atendimento_disponiveis": tipos,
         "tipo_atendimento": escolha.tipo_atendimento,
         "entrega": entrega,
+        "cupom": cupom_aplicado,
         "subtotal_centavos": resumo["subtotal_centavos"],
         "desconto_cupom_centavos": desconto_cupom,
         "taxa_entrega_centavos": taxa,
@@ -176,6 +192,10 @@ def confirmar(conn: sqlite3.Connection, cliente_id: int, escolha: Escolha, total
             (pedido_id, item["id"], car["id"]),
         )
     conn.execute("DELETE FROM carrinho WHERE id = ?", (car["id"],))  # carrinho já está vazio
+    if calc["cupom"]:  # UC30 passo 6, RF-14, RF-17: registra uso do cupom na confirmação
+        cupons.registrar_uso(
+            conn, pedido_id, calc["cupom"]["cupom_id"], calc["desconto_cupom_centavos"]
+        )
     conn.execute(  # passo 11, RF-22
         "INSERT INTO notificacao (pedido_id, status, titulo, mensagem, data_hora) VALUES (?, 'RECEBIDO', ?, ?, ?)",
         (pedido_id, "Pedido recebido", "Recebemos seu pedido. Agora é só concluir o pagamento.", agora),
@@ -203,10 +223,12 @@ def pedido_publico(conn: sqlite3.Connection, pedido_id: int) -> dict:
         entrega = {"endereco": {k: v for k, v in _endereco_publico(end).items() if k != "id"},
                    "previsao_entrega": p["previsao_entrega"], "tempo_estimado_min": minutos}
     subtotal = sum(i["valor_final_centavos"] for i in itens)
-    desconto_cupom = 0  # UC30 (USO_CUPOM) ainda não implementado
+    uso_cupom = cupons.uso_do_pedido(conn, pedido_id)
+    desconto_cupom = uso_cupom["desconto_cupom_centavos"] if uso_cupom else 0
     return {
         "id": p["id"], "status": p["status"], "unidade_id": p["unidade_id"],
         "tipo_atendimento": p["modalidade"], "entrega": entrega,
+        "cupom": uso_cupom,
         "itens": [dict(i) for i in itens],
         "subtotal_centavos": subtotal,
         "desconto_cupom_centavos": desconto_cupom,

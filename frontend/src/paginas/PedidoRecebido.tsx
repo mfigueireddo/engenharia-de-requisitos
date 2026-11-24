@@ -51,8 +51,14 @@ export default function PedidoRecebido({ pedidoId }: { pedidoId: number }) {
               ))}
             </ul>
             <ResumoValores linhas={[
-              ...(p.taxa_entrega_centavos ? [{ rotulo: "Taxa de entrega", centavos: p.taxa_entrega_centavos }] : []),
-              ...(p.desconto_cupom_centavos ? [{ rotulo: "Desconto (cupom)", centavos: p.desconto_cupom_centavos, negativo: true }] : []),
+              ...(p.tipo_atendimento === "ENTREGA"
+                ? [{
+                    rotulo: "Taxa de entrega",
+                    centavos: p.taxa_entrega_centavos,
+                    texto: p.cupom?.isenta_taxa_entrega ? "Grátis (cupom)" : undefined,
+                  }]
+                : []),
+              ...(p.desconto_cupom_centavos ? [{ rotulo: `Desconto (${p.cupom?.codigo ?? "cupom"})`, centavos: p.desconto_cupom_centavos, negativo: true }] : []),
               { rotulo: "Total", centavos: p.total_centavos, destaque: true },
             ]} />
             {p.entrega ? <p className="texto-fraco">Entrega em {enderecoCurto(p.entrega.endereco)}</p> : null}

@@ -8,6 +8,7 @@ import { caminhoDe, ir, Rota, useRota } from "./navegacao";
 import Cadastro from "./paginas/Cadastro";
 import Cardapio from "./paginas/Cardapio";
 import Checkout from "./paginas/Checkout";
+import Cupons from "./paginas/Cupons";
 import DetalheItem from "./paginas/DetalheItem";
 import EmBreve from "./paginas/EmBreve";
 import Entrar from "./paginas/Entrar";
@@ -15,7 +16,7 @@ import Inicio from "./paginas/Inicio";
 import PedidoRecebido from "./paginas/PedidoRecebido";
 import Sacola from "./paginas/Sacola";
 
-const EXIGEM_LOGIN: Rota["tela"][] = ["sacola", "checkout", "pedido-recebido"];
+const EXIGEM_LOGIN: Rota["tela"][] = ["sacola", "cupons", "checkout", "pedido-recebido"];
 
 function Telas() {
   const rota = useRota();
@@ -39,6 +40,8 @@ function Telas() {
       return <DetalheItem key={rota.produtoId} produtoId={rota.produtoId} />;
     case "sacola":
       return <Sacola />;
+    case "cupons":
+      return <Cupons />;
     case "checkout":
       return <Checkout />;
     case "pedido-recebido":

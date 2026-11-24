@@ -160,11 +160,37 @@ export type Endereco = {
 
 export type TipoAtendimento = "ENTREGA" | "RETIRADA" | "DRIVE_THRU";
 
+export type CupomDisponivel = {
+  id: number;
+  codigo: string;
+  descricao: string;
+  percentual_desconto_centesimos: number;
+  valor_maximo_desconto_centavos: number | null;
+  isenta_taxa_entrega: boolean;
+  valor_minimo_pedido_centavos: number;
+  validade_inicio: string;
+  validade_fim: string;
+  limite_usos: number;
+  usos_realizados: number;
+  disponivel: boolean;
+};
+
+export type CupomAplicado = {
+  cupom_id: number;
+  codigo: string;
+  descricao: string;
+  percentual_desconto_centesimos: number;
+  valor_maximo_desconto_centavos: number | null;
+  isenta_taxa_entrega: boolean;
+  desconto_cupom_centavos: number;
+};
+
 export type Previa = {
   carrinho: Carrinho;
   tipos_atendimento_disponiveis: TipoAtendimento[];
   tipo_atendimento: TipoAtendimento;
   entrega: { endereco: Endereco; distancia_m: number; tempo_estimado_min: number } | null;
+  cupom: CupomAplicado | null;
   subtotal_centavos: number;
   desconto_cupom_centavos: number;
   taxa_entrega_centavos: number;
@@ -177,6 +203,7 @@ export type Pedido = {
   unidade_id: number;
   tipo_atendimento: TipoAtendimento;
   entrega: { endereco: Omit<Endereco, "id">; previsao_entrega: string; tempo_estimado_min: number } | null;
+  cupom: CupomAplicado | null;
   itens: { id: number; nome: string; quantidade: number; observacao: string | null; valor_final_centavos: number }[];
   subtotal_centavos: number;
   desconto_cupom_centavos: number;
@@ -211,10 +238,21 @@ export const api = {
   removerItem: (itemId: number) => requisitar<Carrinho>(`/carrinho/itens/${itemId}`, json("DELETE")),
   esvaziarCarrinho: () => requisitar<Carrinho>("/carrinho", json("DELETE")),
 
-  // Finalizar pedido (UC28)
+  // Finalizar pedido (UC28) e Aplicar cupom ao pedido (UC30)
   enderecos: () => requisitar<Endereco[]>("/enderecos"),
-  previa: (tipo_atendimento: TipoAtendimento, endereco_id: number | null) =>
-    requisitar<Previa>("/pedidos/previa", json("POST", { tipo_atendimento, endereco_id })),
-  confirmarPedido: (tipo_atendimento: TipoAtendimento, endereco_id: number | null, total_centavos: number) =>
-    requisitar<Pedido>("/pedidos", json("POST", { tipo_atendimento, endereco_id, total_centavos })),
+  cupons: () => requisitar<CupomDisponivel[]>("/cupons"),
+  aplicarCupom: (codigo: string) =>
+    requisitar<CupomAplicado & { subtotal_centavos: number }>("/cupons/aplicar", json("POST", { codigo })),
+  previa: (tipo_atendimento: TipoAtendimento, endereco_id: number | null, codigo_cupom?: string | null) =>
+    requisitar<Previa>("/pedidos/previa", json("POST", { tipo_atendimento, endereco_id, codigo_cupom: codigo_cupom ?? null })),
+  confirmarPedido: (
+    tipo_atendimento: TipoAtendimento,
+    endereco_id: number | null,
+    total_centavos: number,
+    codigo_cupom?: string | null,
+  ) =>
+    requisitar<Pedido>(
+      "/pedidos",
+      json("POST", { tipo_atendimento, endereco_id, total_centavos, codigo_cupom: codigo_cupom ?? null }),
+    ),
 };
