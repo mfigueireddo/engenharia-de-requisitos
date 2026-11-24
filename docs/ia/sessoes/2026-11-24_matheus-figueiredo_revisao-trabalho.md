@@ -66,7 +66,7 @@ depois, me de um tutorial basico de como navegar pelo site e testar cada feature
 
 **Arquivos alterados:** este registro.
 
-**Decisão humana:** <pendente>
+**Decisão humana:** aceito — confirmado pelo humano no fim da sessão (interação 13).
 
 ### 3
 
@@ -87,7 +87,7 @@ Link: https://claude.ai/artifact/QaaMt1vymGaR5U1C9PP2ro
 
 **Arquivos alterados:** este registro (o deck fica no Claude Slides; prints e roteiro ficaram só no scratchpad da sessão).
 
-**Decisão humana:** <pendente>
+**Decisão humana:** aceito — confirmado pelo humano no fim da sessão (interação 13).
 
 ### 4
 
@@ -103,7 +103,7 @@ agora quero que vc monte um script .sh que roda tudo que eu preciso pro programa
 
 **Arquivos alterados:** `scripts/rodar.sh` (novo), `README.md`, `ESTRUTURA.md`, este registro.
 
-**Decisão humana:** <pendente>
+**Decisão humana:** aceito — confirmado pelo humano no fim da sessão (interação 13).
 
 ### 5
 
@@ -119,7 +119,7 @@ eu quero um banco de dados base compartilhado pra todo mundo poder testar as coi
 
 **Arquivos alterados:** `backend/scripts/base_compartilhada.py` (novo), `backend/tests/test_base_compartilhada.py` (novo), `backend/app/integracoes/geocodificacao.py`, `scripts/rodar.sh`, `README.md`, `ESTRUTURA.md`, este registro.
 
-**Decisão humana:** <pendente>
+**Decisão humana:** aceito — confirmado pelo humano no fim da sessão (interação 13).
 
 ### 6
 
@@ -133,7 +133,7 @@ ent como ficou? temos um script que roda tudo e como fazemos pra pegar a base de
 
 **Arquivos alterados:** este registro.
 
-**Decisão humana:** <pendente>
+**Decisão humana:** aceito — confirmado pelo humano no fim da sessão (interação 13).
 
 ### 7
 
@@ -147,7 +147,7 @@ ok. coloca a apresentacao que a gente fez aqui no claude slides como um .pdf no 
 
 **Arquivos alterados:** `docs/apresentacoes/2026-11-24_features-implementadas.pdf` (novo), `ESTRUTURA.md`, este registro.
 
-**Decisão humana:** <pendente>
+**Decisão humana:** aceito — confirmado pelo humano no fim da sessão (interação 13).
 
 ### 8
 
@@ -165,7 +165,7 @@ pq a gente ta considerando o commit do wopps nessa branch? ele quebra tudo. eu q
 
 **Arquivos alterados:** nenhum arquivo do projeto (só a posição do branch); este registro (metadado "Branch" e esta entrada).
 
-**Decisão humana:** <pendente>
+**Decisão humana:** aceito — confirmado pelo humano no fim da sessão (interação 13).
 
 ### 9
 
@@ -179,7 +179,7 @@ qual eh a conta ja cadastrada
 
 **Arquivos alterados:** este registro.
 
-**Decisão humana:** <pendente>
+**Decisão humana:** aceito — confirmado pelo humano no fim da sessão (interação 13).
 
 ### 10
 
@@ -193,7 +193,7 @@ vou mandar uma mensagem no whatsapp com essas contas. passa ai
 
 **Arquivos alterados:** este registro.
 
-**Decisão humana:** <pendente>
+**Decisão humana:** aceito — confirmado pelo humano no fim da sessão (interação 13).
 
 ### 11
 
@@ -207,7 +207,35 @@ commita tudo e abre um pr
 
 **Arquivos alterados:** este registro, `docs/ia/INDICE.md`, transcript.
 
-**Decisão humana:** <pendente>
+**Decisão humana:** aceito — confirmado pelo humano no fim da sessão (interação 13).
+
+### 12
+
+**Prompt (literal):**
+
+```text
+que interacoes
+```
+
+**Saída (resumo):** Explicou que "interações" são as entradas numeradas deste registro, uma por pedido do humano, e que o protocolo do `AGENTS.md` (5.2) pede a decisão humana (aceito / aceito com ajustes / rejeitado) em cada uma. Listou as interações 2 a 11, com o que foi pedido e entregue em cada uma, para o humano decidir.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** aceito — confirmado pelo humano no fim da sessão (interação 13).
+
+### 13
+
+**Prompt (literal):**
+
+```text
+Sim, todas aceitas
+```
+
+**Saída (resumo):** Marcou as interações 2 a 12 como aceitas, tirou essa pendência do "Resultado", commitou o registro e o transcript e deu push no branch do PR #7.
+
+**Arquivos alterados:** este registro, transcript.
+
+**Decisão humana:** aceito (é a própria confirmação).
 
 ## Resultado
 
@@ -224,7 +252,6 @@ commita tudo e abre um pr
   - Nos testes do `rodar.sh`: um teste com `kill -INT` que não valia (SIGINT ignorado em segundo plano), um `pkill` que derrubou o próprio shell e um id de produto chutado. Todos refeitos.
   - Num resumo anterior, RNF-26 estava citado com sentido errado; no deck foi usado o sentido da ERS.
 - **Pendências:**
-  - Decisões humanas das interações 2 a 11.
   - Aviso do UC29 E2 se perde no front-end (busca dupla do `StrictMode` e do contexto do carrinho): não corrigido.
   - `rodar.sh` não testado no Mac e no Windows; caminho "banco já existe" só revisado no código.
   - A `main` continua com o `main.py` quebrado; a correção está no branch `hugo-freires/cupom-pedido`.
