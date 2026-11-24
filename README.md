@@ -1,6 +1,33 @@
 # BurguerJá
 
-Requisitos: **Python 3.11+** e **Node.js 20+**. Use dois terminais.
+Requisitos: **Python 3.11+** e **Node.js 20+**.
+
+## Jeito rápido
+
+```bash
+bash scripts/rodar.sh
+```
+
+Instala o que faltar e sobe a API (http://localhost:8000/docs) e o app
+(http://localhost:5173) no mesmo terminal. Ctrl+C para os dois. No Windows, use o Git Bash.
+
+Opções: `--resetar-banco` (volta para a base compartilhada), `--banco-vazio`,
+`--testes` (roda `pytest` e o build e sai), `--ajuda`.
+
+## Base de testes compartilhada
+
+Na primeira vez (ou com `--resetar-banco`) o banco local é recriado com a mesma
+base para todo o grupo ([backend/scripts/base_compartilhada.py](backend/scripts/base_compartilhada.py)).
+Senha de todos: `demo1234`.
+
+| Login | Para testar |
+|---|---|
+| `demo@burguerja.com` | Cliente básico com 2 endereços (PUC e Jardim Botânico) e 3 cupons |
+| `ana@burguerja.com` | Sacola pronta na Gávea e cupons (UC29, UC30 e UC28 direto) |
+| `bruno@burguerja.com` | 2 pedidos já feitos, endereço perto da Botafogo e cupons |
+| `carla@burguerja.com` | Conta nova: sem endereço, sacola, pedido ou cupom |
+
+## Passo a passo (dois terminais)
 
 **1. API** (http://localhost:8000/docs)
 

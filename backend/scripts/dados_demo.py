@@ -10,6 +10,8 @@ Não é rota da API: roda direto no banco local, só em desenvolvimento.
 É idempotente: rodar de novo não duplica nada.
 """
 
+from contextlib import closing
+
 from app import db, relogio, seguranca
 
 EMAIL = "demo@burguerja.com"
@@ -44,7 +46,7 @@ CUPONS = [
 
 def criar() -> None:
     db.inicializar()
-    with db.conectar() as conn:
+    with closing(db.conectar()) as conn, conn:
         linha = conn.execute("SELECT id FROM cliente WHERE email = ?", (EMAIL,)).fetchone()
         if linha is None:
             cur = conn.execute(

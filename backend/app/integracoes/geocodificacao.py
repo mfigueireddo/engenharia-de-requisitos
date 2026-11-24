@@ -31,6 +31,7 @@ CEPS_SIMULADOS: dict[str, Coordenadas] = {
     "22451900": Coordenadas(-22.9790, -43.2330),  # PUC-Rio, R. Marquês de São Vicente
     "22451040": Coordenadas(-22.9764, -43.2290),  # Gávea, R. Marquês de São Vicente (início)
     "22470050": Coordenadas(-22.9681, -43.2210),  # Jardim Botânico
+    "22250040": Coordenadas(-22.9460, -43.1800),  # Botafogo, Praia de Botafogo (dentro do raio da unidade Botafogo)
 }
 
 Transporte = Callable[[str], Coordenadas | None]

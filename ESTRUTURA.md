@@ -44,7 +44,8 @@ entra aqui no mesmo commit.
 │   │       ├── geocodificacao.py  CEP → latitude/longitude por tabela fixa (decisão Q8)
 │   │       └── dados_simulados/   Respostas fixas dos mocks (JSON)
 │   ├── scripts/
-│   │   └── dados_demo.py     Cliente de demonstração com endereços e cupons (só desenvolvimento; não é rota)
+│   │   ├── dados_demo.py     Cliente de demonstração com endereços e cupons (só desenvolvimento; não é rota)
+│   │   └── base_compartilhada.py  Recria o banco local com a base de testes do grupo (usa dados_demo)
 │   └── tests/
 │       ├── conftest.py       Fixtures: banco SQLite temporário + TestClient
 │       ├── test_saude.py     /api/health e isolamento do banco
@@ -57,7 +58,8 @@ entra aqui no mesmo commit.
 │       ├── test_dinheiro.py  RNF-23
 │       ├── test_integracoes.py  RNF-19 com falhas simuladas
 │       ├── test_concorrencia.py Conexão usada em outra thread (evita "database is locked")
-│       └── test_dados_demo.py   Script de dados de demonstração
+│       ├── test_dados_demo.py   Script de dados de demonstração
+│       └── test_base_compartilhada.py  Base compartilhada: sempre igual, cenários e logins
 ├── frontend/                 Interface — TypeScript + React (Vite)
 │   ├── package.json
 │   ├── vite.config.ts        Porta 5173 e proxy de /api para a API (porta 8000)
@@ -79,10 +81,12 @@ entra aqui no mesmo commit.
 ├── docs/
 │   ├── srs/                  ERS em Markdown (srs-pt.md) + figuras (media/)
 │   │   └── Projeto_Relacional_de_Tabelas.drawio  Modelo relacional do grupo (ERS, Ap. B.3); abrir em app.diagrams.net
-│   ├── apresentacoes/        Resumos para o professor (AAAA-MM-DD_<tema>.md)
+│   ├── apresentacoes/        Resumos e slides para o professor (AAAA-MM-DD_<tema>.md ou .pdf)
 │   ├── planejamento/         Levantamentos e planos de implementação (o que falta, ordem dos PRs)
 │   └── ia/                   Registro do uso de IA (ver docs/ia/README.md)
-├── scripts/ia/autor.sh       Nome do git → identificador usado em docs/ia/
+├── scripts/
+│   ├── rodar.sh              Sobe tudo com um comando: instala, dados demo, API + front-end
+│   └── ia/autor.sh           Nome do git → identificador usado em docs/ia/
 └── .claude/                  Configuração e hooks do Claude Code
 ```
 
@@ -138,6 +142,11 @@ entra aqui no mesmo commit.
 18. **Toda a interface em português do Brasil** (ERS 2.4), com erros junto ao
     campo e confirmação para ações que não podem ser desfeitas (`<Folha>`, ERS 3.1).
 19. **Dados de demonstração só por `backend/scripts/`**, nunca por rota da API.
+20. **Base de testes do grupo = `backend/scripts/base_compartilhada.py`, nunca um
+    `.db` no git.** O script apaga o banco local e o recria sempre igual, pela
+    própria API (`bash scripts/rodar.sh --resetar-banco`). Cenário novo para todos
+    testarem entra no script (e em `tests/test_base_compartilhada.py`) no mesmo PR
+    que precisar dele; CEP novo de endereço entra em `integracoes/geocodificacao.py`.
 
 ## Crescimento previsto (sugestão, não obrigatório)
 
