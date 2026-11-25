@@ -101,3 +101,15 @@
 .pagina-sucesso__titulo { font-size: var(--tam-2xl); font-weight: var(--peso-titulo); }
 .pagina-sucesso__resumo { width: 100%; text-align: left; display: flex; flex-direction: column; gap: var(--esp-3); }
 .pagina-sucesso .aviso { text-align: left; width: 100%; }
+
+/* UC31 — histórico e acompanhamento do pedido (telas 11 e 13). */
+.pedido-lista__cabecalho { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--esp-3); }
+.pedido-lista__unidade { font-weight: var(--peso-forte); margin-top: var(--esp-3); }
+.pedido-detalhe__status { display: flex; align-items: center; justify-content: space-between; gap: var(--esp-3); }
+.pedido-detalhe__entrega { display: flex; flex-direction: column; gap: var(--esp-1); border-top: 1px solid var(--cor-borda); padding-top: var(--esp-3); }
+.pedido-detalhe__timeline { display: flex; flex-direction: column; gap: var(--esp-3); }
+.pedido-detalhe__evento { display: grid; grid-template-columns: 20px 1fr; gap: var(--esp-3); position: relative; padding-bottom: var(--esp-3); }
+.pedido-detalhe__evento:not(:last-child)::before { content: ""; position: absolute; left: 9px; top: 20px; bottom: 0; width: 2px; background: var(--cor-borda); }
+.pedido-detalhe__ponto { width: 20px; height: 20px; border: 2px solid var(--cor-inativo); border-radius: 50%; background: var(--cor-fundo); z-index: 1; }
+.pedido-detalhe__evento--atual .pedido-detalhe__ponto { border-color: var(--cor-primaria); background: var(--cor-primaria); }
+.pedido-detalhe__evento > div:last-child { display: flex; flex-direction: column; gap: var(--esp-1); }

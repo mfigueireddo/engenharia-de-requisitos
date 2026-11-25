@@ -53,6 +53,21 @@ def encerrar_sessao(conn: sqlite3.Connection, token: str) -> None:
     conn.execute("DELETE FROM sessao WHERE token_hash = ?", (_hash_token(token),))
 
 
+def cliente_por_token(conn: sqlite3.Connection, token: str | None) -> sqlite3.Row | None:
+    """Resolve um token para o cliente; usado pelo handshake do WebSocket."""
+    if not token:
+        return None
+    linha = conn.execute(
+        """SELECT c.id, c.nome, c.email, s.expira_em
+             FROM sessao s JOIN cliente c ON c.id = s.cliente_id
+            WHERE s.token_hash = ?""",
+        (_hash_token(token),),
+    ).fetchone()
+    if linha is None or relogio.de_texto(linha["expira_em"]) <= relogio.agora():
+        return None
+    return linha
+
+
 def conexao():
     """Dependência FastAPI: uma conexão por requisição, com commit no fim."""
     conn = db.conectar()
@@ -78,13 +93,8 @@ def cliente_atual(
     conn: sqlite3.Connection = Depends(conexao),
 ) -> sqlite3.Row:
     """Cliente logado (RNF-09, RNF-13, RN-01). 401 se o token não vale ou expirou."""
-    linha = conn.execute(
-        """SELECT c.id, c.nome, c.email, s.expira_em
-             FROM sessao s JOIN cliente c ON c.id = s.cliente_id
-            WHERE s.token_hash = ?""",
-        (_hash_token(token),),
-    ).fetchone()
-    if linha is None or relogio.de_texto(linha["expira_em"]) <= relogio.agora():
+    linha = cliente_por_token(conn, token)
+    if linha is None:
         raise HTTPException(401, "Sessão inválida ou expirada. Entre novamente.",
                             headers={"WWW-Authenticate": "Bearer"})
     return linha

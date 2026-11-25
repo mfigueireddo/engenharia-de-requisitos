@@ -11,12 +11,14 @@ import Checkout from "./paginas/Checkout";
 import Cupons from "./paginas/Cupons";
 import DetalheItem from "./paginas/DetalheItem";
 import EmBreve from "./paginas/EmBreve";
+import AcompanharPedido from "./paginas/AcompanharPedido";
 import Entrar from "./paginas/Entrar";
 import Inicio from "./paginas/Inicio";
+import Pedidos from "./paginas/Pedidos";
 import PedidoRecebido from "./paginas/PedidoRecebido";
 import Sacola from "./paginas/Sacola";
 
-const EXIGEM_LOGIN: Rota["tela"][] = ["sacola", "cupons", "checkout", "pedido-recebido"];
+const EXIGEM_LOGIN: Rota["tela"][] = ["sacola", "cupons", "checkout", "pedido-recebido", "pedidos", "pedido"];
 
 function Telas() {
   const rota = useRota();
@@ -46,7 +48,10 @@ function Telas() {
       return <Checkout />;
     case "pedido-recebido":
       return <PedidoRecebido pedidoId={rota.pedidoId} />;
+    case "pedido":
+      return <AcompanharPedido pedidoId={rota.pedidoId} />;
     case "pedidos":
+      return <Pedidos />;
     case "fidelidade":
       return <EmBreve aba={rota.tela} />;
     default:

@@ -160,3 +160,14 @@ provisórios do TBD-2, decisão de 2026-11-19). No front-end:
 o pagamento substitui a tela `PedidoRecebido` (telas 08–10), e o UC31 e a
 fidelidade substituem `EmBreve` (telas 11–14). O UC33 (tela 03) deve ligar o
 "novo endereço" do `Checkout` (UC28 A2). Ao fazer isso, atualize a árvore e as regras acima.
+21. **UC31:** mudanças do SGL entram por `POST /api/webhooks/sgl/pedidos/{id}/status`,
+    assinado com HMAC-SHA256 no header `X-SGL-Signature` e segredo da variável
+    `BURGUERJA_SGL_WEBHOOK_SECRET`; o front-end acompanha por `GET /api/pedidos/{id}`
+    e WebSocket `/api/ws/pedidos/{id}?token=...`.
+### Arquivos acrescentados para UC31
+
+- `backend/app/routers/acompanhamento.py`: endpoints REST, webhook HMAC do SGL e WebSocket autenticado.
+- `backend/app/servicos/acompanhamento.py`: listagem, detalhe, notificações e conexões em tempo real.
+- `backend/tests/test_acompanhamento.py`: testes de RF-19 a RF-23, RNF-13, RNF-15 e WebSocket.
+- `frontend/src/paginas/Pedidos.tsx`: histórico de pedidos (tela 13).
+- `frontend/src/paginas/AcompanharPedido.tsx`: detalhe e linha do tempo (tela 11).

@@ -159,6 +159,14 @@ export type Endereco = {
 };
 
 export type TipoAtendimento = "ENTREGA" | "RETIRADA" | "DRIVE_THRU";
+export type StatusPedido =
+  | "RECEBIDO"
+  | "PAGO"
+  | "EM_PREPARO"
+  | "PRONTO"
+  | "SAIU_PARA_ENTREGA"
+  | "ENTREGUE"
+  | "CANCELADO";
 
 export type CupomDisponivel = {
   id: number;
@@ -199,8 +207,9 @@ export type Previa = {
 
 export type Pedido = {
   id: number;
-  status: string;
+  status: StatusPedido;
   unidade_id: number;
+  unidade: { id: number; nome: string };
   tipo_atendimento: TipoAtendimento;
   entrega: { endereco: Omit<Endereco, "id">; previsao_entrega: string; tempo_estimado_min: number } | null;
   cupom: CupomAplicado | null;
@@ -210,7 +219,17 @@ export type Pedido = {
   taxa_entrega_centavos: number;
   total_centavos: number;
   criado_em: string;
+  atualizado_em: string;
   notificacoes: { status: string; titulo: string; mensagem: string; criado_em: string }[];
+};
+
+export type PedidoResumo = {
+  id: number;
+  status: StatusPedido;
+  unidade: { id: number; nome: string };
+  tipo_atendimento: TipoAtendimento;
+  criado_em: string;
+  atualizado_em: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -255,4 +274,13 @@ export const api = {
       "/pedidos",
       json("POST", { tipo_atendimento, endereco_id, total_centavos, codigo_cupom: codigo_cupom ?? null }),
     ),
+  pedidos: () => requisitar<PedidoResumo[]>("/pedidos"),
+  pedido: (pedidoId: number) => requisitar<Pedido>(`/pedidos/${pedidoId}`),
+  conectarPedido: (pedidoId: number) => {
+    const protocolo = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const token = lerToken() ?? "";
+    return new WebSocket(
+      `${protocolo}//${window.location.host}/api/ws/pedidos/${pedidoId}?token=${encodeURIComponent(token)}`,
+    );
+  },
 };

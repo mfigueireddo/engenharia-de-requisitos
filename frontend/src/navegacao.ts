@@ -12,6 +12,7 @@ export type Rota =
   | { tela: "cupons" }
   | { tela: "checkout" }
   | { tela: "pedido-recebido"; pedidoId: number }
+  | { tela: "pedido"; pedidoId: number }
   | { tela: "pedidos" }
   | { tela: "fidelidade" };
 
@@ -36,6 +37,8 @@ export function lerRota(hash: string = window.location.hash): Rota {
       return { tela: "checkout" };
     case "pedido-recebido":
       return { tela: "pedido-recebido", pedidoId: Number(partes[1]) };
+    case "pedido":
+      return Number(partes[1]) ? { tela: "pedido", pedidoId: Number(partes[1]) } : { tela: "pedidos" };
     case "pedidos":
       return { tela: "pedidos" };
     case "fidelidade":
@@ -55,6 +58,8 @@ export function caminhoDe(rota: Rota): string {
       return `#/item/${rota.produtoId}`;
     case "pedido-recebido":
       return `#/pedido-recebido/${rota.pedidoId}`;
+    case "pedido":
+      return `#/pedido/${rota.pedidoId}`;
     default:
       return `#/${rota.tela}`;
   }
