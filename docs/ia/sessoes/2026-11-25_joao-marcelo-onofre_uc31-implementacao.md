@@ -60,6 +60,22 @@ antes de fazer o PR peço para que reveja como a documentação do projeto está
 
 **Decisão humana:** pendente — confirmar após a revisão.
 
+### 4
+
+**Prompt (literal):**
+
+```text
+altere os nomes e datas dos arquivos, para ficar de acordo com o que alterou
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\ia\sessoes\2026-11-25_joao-marcelo-onofre_uc31-implementacao.md
+```
+
+**Saída (resumo):** Em andamento: renomear os documentos de apresentação atualizados para refletir a data de 25/11/2026 e corrigir referências aos nomes anteriores.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** pendente — confirmar após a alteração.
+
 ### 3
 
 **Prompt (literal):**
@@ -74,7 +90,7 @@ Use as sessoes antigas dos outros integrantes para alterar os documentos dessa p
 @c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\apresentacoes\2026-11-19_resumo-matheus-paulo.md
 ```
 
-**Saída (resumo):** Foram atualizados `docs/apresentacoes/2026-11-19_estado-atual-vs-ers.md` e `docs/apresentacoes/2026-11-19_resumo-matheus-paulo.md` usando o padrão das sessões anteriores. Os textos agora registram UC30 pronto na main, UC31 implementado no branch, 17/25 tabelas, 145 testes na main e 153 no branch, além do webhook, WebSocket, reconexão e novos próximos passos. Os documentos de planejamento/setup permaneceram históricos.
+**Saída (resumo):** Foram atualizados `docs/apresentacoes/2026-11-25_estado-atual-vs-ers.md` e `docs/apresentacoes/2026-11-25_resumo-matheus-paulo.md` usando o padrão das sessões anteriores. Os textos agora registram UC30 pronto na main, UC31 implementado no branch, 17/25 tabelas, 145 testes na main e 153 no branch, além do webhook, WebSocket, reconexão e novos próximos passos. Os documentos de planejamento/setup permaneceram históricos.
 
 **Arquivos alterados:** este registro.
 
