@@ -11,7 +11,7 @@
 | Modelo (ID exato) | gpt-5-codex |
 | Modo de uso | agente |
 | Branch | joao-marcelo-onofre/uc31-implementacao |
-| Commits | 465bffa (implementação), 6932271 (registro), b3bcf67 (README/estrutura), caca4d6 (apresentações; PR a preencher) |
+| Commits | 465bffa (implementação), 6932271 (registro), b3bcf67 (README/estrutura), caca4d6 (apresentações), c799173 (nomes/datas; PR a preencher) |
 | Transcript | não disponível |
 | Sessão anterior | não se aplica |
 
@@ -70,7 +70,7 @@ altere os nomes e datas dos arquivos, para ficar de acordo com o que alterou
 @c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\ia\sessoes\2026-11-25_joao-marcelo-onofre_uc31-implementacao.md
 ```
 
-**Saída (resumo):** Em andamento: renomear os documentos de apresentação atualizados para refletir a data de 25/11/2026 e corrigir referências aos nomes anteriores.
+**Saída (resumo):** Os documentos foram renomeados para `2026-11-25_estado-atual-vs-ers.md` e `2026-11-25_resumo-matheus-paulo.md`. As referências descritivas foram corrigidas; os caminhos antigos foram preservados apenas nos prompts literais da sessão.
 
 **Arquivos alterados:** este registro.
 
