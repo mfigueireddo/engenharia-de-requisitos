@@ -46,6 +46,20 @@ inicie a sessao como está nos documentos do projeto
 
 **Decisão humana:** pendente — confirmar ao final da sessão.
 
+### 2
+
+**Prompt (literal):**
+
+```text
+antes de fazer o PR peço para que reveja como a documentação do projeto está feita, Principalmente nos pontos que vc escreveu no readme e estrutura. Os dois outros integrantes do grupo, que fizeram seus casos de uso, a IA nao me parece ter feito a mesma documentação que vc está fazendo
+```
+
+**Saída (resumo):** A revisão comparou o UC31 com os registros e commits dos UCs anteriores. O README foi mantido curto, sem uma seção funcional nova; o ESTRUTURA.md passou a listar os arquivos do UC31 diretamente na árvore e a regra do contrato do SGL foi movida para as regras gerais. A seção avulsa criada no fim do ESTRUTURA.md foi removida.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** pendente — confirmar após a revisão.
+
 ## Resultado
 
 - **Entregue:** histórico e detalhe de pedidos; webhook assinado do SGL; linha do tempo persistida; WebSocket por pedido com filtro por cliente; reconexão após perda de conexão; tela de histórico e acompanhamento em português; testes e documentação do contrato.

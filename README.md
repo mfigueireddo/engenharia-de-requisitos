@@ -59,13 +59,3 @@ Testes da API: `cd backend && python -m pytest`
 Contribuição: um branch por tarefa e merge na `main` só por pull request (ver [AGENTS.md](AGENTS.md), seção 6).
 
 Estrutura do projeto: [ESTRUTURA.md](ESTRUTURA.md) · Requisitos: [docs/srs/srs-pt.md](docs/srs/srs-pt.md) · Uso de IA: [docs/ia/](docs/ia/README.md)
-
-## Acompanhar pedido (UC31)
-
-Depois de entrar, abra a aba **Pedidos** para ver o histórico e toque em um
-pedido para abrir o detalhe e a linha do tempo. A tela mantém um WebSocket
-autenticado e busca novamente o pedido quando a conexão volta.
-
-Para simular uma atualização do SGL, defina `BURGUERJA_SGL_WEBHOOK_SECRET` na
-API e envie um POST assinado no header `X-SGL-Signature` (HMAC-SHA256). O
-contrato completo está documentado em `ESTRUTURA.md` e disponível em `/docs`.
