@@ -35,7 +35,7 @@ inicie o log da sessao como pede as especificacoes do projeto
 me da em bullet points curtos o que ja foi implementado
 ```
 
-**Saída (resumo):** Criou o branch `matheus-figueiredo/revisao-trabalho` a partir de `origin/main` (`7250033`) e este registro. Leu `ESTRUTURA.md`, o resumo `docs/apresentacoes/2026-11-25_estado-atual-vs-ers.md` e o histórico. Listou em bullets o que está implementado: infra (auth, unidades/cardápio com SGL simulado), UC29 completo, UC28 sem pagamento/cupom, UC33 só listagem, banco com 15/25 tabelas. Apontou que o commit `7250033` (MirandaWopps, direto na `main`, sem PR) substituiu o `backend/app/main.py` por uma versão que não registra nenhum router `/api/*` e grava endereços num `.txt` fora do SQLite (viola RNF-20/ERS 2.5): `pytest` → 26 failed, 45 errors, 60 passed. Notou ainda o branch não mergeado `hugo-freires/cupom-pedido` (UC30 + correção do `main.py`).
+**Saída (resumo):** Criou o branch `matheus-figueiredo/revisao-trabalho` a partir de `origin/main` (`7250033`) e este registro. Leu `ESTRUTURA.md`, o resumo `docs/apresentacoes/2026-11-19_estado-atual-vs-ers.md` e o histórico. Listou em bullets o que está implementado: infra (auth, unidades/cardápio com SGL simulado), UC29 completo, UC28 sem pagamento/cupom, UC33 só listagem, banco com 15/25 tabelas. Apontou que o commit `7250033` (MirandaWopps, direto na `main`, sem PR) substituiu o `backend/app/main.py` por uma versão que não registra nenhum router `/api/*` e grava endereços num `.txt` fora do SQLite (viola RNF-20/ERS 2.5): `pytest` → 26 failed, 45 errors, 60 passed. Notou ainda o branch não mergeado `hugo-freires/cupom-pedido` (UC30 + correção do `main.py`).
 
 **Arquivos alterados:** `docs/ia/sessoes/2026-11-24_matheus-figueiredo_revisao-trabalho.md` (novo)
 

@@ -76,6 +76,22 @@ altere os nomes e datas dos arquivos, para ficar de acordo com o que alterou
 
 **Decisão humana:** pendente — confirmar após a alteração.
 
+### 5
+
+**Prompt (literal):**
+
+```text
+vamos desfazer essa renomeação e alteração nas sessoes. Ao inves de alterar os arquivos da pasta apresentações que já existe, crie novos no mesmo estilo, para falar sobre a minha parte
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\ia\sessoes\2026-11-19_matheus-figueiredo_resumo-progresso.md
+```
+
+**Saída (resumo):** Os dois documentos rastreados de 19/11 foram restaurados com seus nomes e conteúdos originais. Foi criado um novo documento separado, `docs/apresentacoes/2026-11-25_joao-marcelo-uc31.md`, dedicado à implementação do UC31. Um arquivo não rastreado que já existia, `2026-11-25_resumo-matheus-paulo-hugo-joaom.md`, foi preservado sem alterações.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** pendente — confirmar após a alteração.
+
 ### 3
 
 **Prompt (literal):**
@@ -98,10 +114,10 @@ Use as sessoes antigas dos outros integrantes para alterar os documentos dessa p
 
 ## Resultado
 
-- **Entregue:** histórico e detalhe de pedidos; webhook assinado do SGL; linha do tempo persistida; WebSocket por pedido com filtro por cliente; reconexão após perda de conexão; tela de histórico e acompanhamento em português; testes e documentação do contrato.
+- **Entregue:** histórico e detalhe de pedidos; webhook assinado do SGL; linha do tempo persistida; WebSocket por pedido com filtro por cliente; reconexão após perda de conexão; tela de histórico e acompanhamento em português; testes e documento separado sobre a contribuição do UC31.
 - **Testes:** `backend` — 153 passed, 1 warning de depreciação do Starlette; `frontend` — `npm run build` concluído; checagem de problemas sem erros; `git diff --check` limpo.
 - **Problemas da IA:** `scripts/ia/autor.sh` não executou devido à falha de WSL/bash; a instalação inicial pela ferramenta Python não refletiu no interpretador do terminal e foi corrigida instalando as versões fixadas no interpretador configurado. Nenhum problema funcional permaneceu nos testes.
-- **Pendências:** abrir o PR e obter revisão/aprovação de outro integrante; merge somente depois da revisão humana. Transcript bruto não disponível.
+- **Pendências:** abrir o PR e obter revisão/aprovação de outro integrante; merge somente depois da revisão humana. Transcript bruto não disponível. Os documentos antigos de apresentação permanecem históricos.
 
 ## Reflexão
 

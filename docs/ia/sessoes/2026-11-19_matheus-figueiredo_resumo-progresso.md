@@ -41,8 +41,8 @@ depois faca um resumo sobre o estado atual do backend/frontend, comparando com o
 `2026-11-18_henriqueecoa_carrinho-e-checkout.md`), a Seção 4 da ERS, o
 `schema.sql`, as rotas e as tabelas do `.drawio`. Rodou `python -m pytest`
 (131 passed) e `npm run build` (ok). Criou dois documentos:
-- `docs/apresentacoes/2026-11-25_resumo-matheus-paulo.md` (uma página, por pessoa).
-- `docs/apresentacoes/2026-11-25_estado-atual-vs-ers.md`: tabela por UC (UC28 e
+- `docs/apresentacoes/2026-11-19_resumo-matheus-paulo.md` (uma página, por pessoa).
+- `docs/apresentacoes/2026-11-19_estado-atual-vs-ers.md`: tabela por UC (UC28 e
   UC29 prontos, UC33 parcial, UC30–UC32 não começados), 15 de 25 tabelas do
   diagrama implementadas (faltam pagamento TPT, cartão, cupom, fidelidade),
   restrições da Seção 2.5 pendentes (WebSocket, gateway, triggers de
@@ -77,7 +77,7 @@ vc n fez um arquivo so do paulo?
 ```
 
 **Saída (resumo):** a IA respondeu que não: fez um arquivo único
-(`2026-11-25_resumo-matheus-paulo.md`) com uma seção para cada um, e
+(`2026-11-19_resumo-matheus-paulo.md`) com uma seção para cada um, e
 perguntou se o humano quer separar em dois arquivos.
 
 **Arquivos alterados:** este registro.
