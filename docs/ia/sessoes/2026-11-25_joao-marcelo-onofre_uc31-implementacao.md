@@ -11,7 +11,7 @@
 | Modelo (ID exato) | gpt-5-codex |
 | Modo de uso | agente |
 | Branch | joao-marcelo-onofre/uc31-implementacao |
-| Commits | 465bffa (implementação), 6932271 (registro), b3bcf67 (README/estrutura), caca4d6 (apresentações), c799173 (nomes/datas; PR a preencher) |
+| Commits | 465bffa (implementação), 6932271 (registro), b3bcf67 (README/estrutura), caca4d6 (apresentações), c799173 (nomes/datas), 6923d69 (restauração e novo resumo; PR a preencher) |
 | Transcript | não disponível |
 | Sessão anterior | não se aplica |
 
