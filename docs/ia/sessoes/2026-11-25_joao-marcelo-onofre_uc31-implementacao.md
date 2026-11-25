@@ -60,6 +60,26 @@ antes de fazer o PR peço para que reveja como a documentação do projeto está
 
 **Decisão humana:** pendente — confirmar após a revisão.
 
+### 3
+
+**Prompt (literal):**
+
+```text
+Use as sessoes antigas dos outros integrantes para alterar os documentos dessa pasta, acrecentando oque faz sentido de acordo com a nova implementação do UC31
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\apresentacoes
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\apresentacoes\2026-11-19_estado-atual-vs-ers.md
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\apresentacoes\2026-11-19_resumo-matheus-paulo.md
+```
+
+**Saída (resumo):** Foram atualizados `docs/apresentacoes/2026-11-19_estado-atual-vs-ers.md` e `docs/apresentacoes/2026-11-19_resumo-matheus-paulo.md` usando o padrão das sessões anteriores. Os textos agora registram UC30 pronto na main, UC31 implementado no branch, 17/25 tabelas, 145 testes na main e 153 no branch, além do webhook, WebSocket, reconexão e novos próximos passos. Os documentos de planejamento/setup permaneceram históricos.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** pendente — confirmar após a revisão.
+
 ## Resultado
 
 - **Entregue:** histórico e detalhe de pedidos; webhook assinado do SGL; linha do tempo persistida; WebSocket por pedido com filtro por cliente; reconexão após perda de conexão; tela de histórico e acompanhamento em português; testes e documentação do contrato.
