@@ -11,7 +11,7 @@
 | Modelo (ID exato) | gpt-5-codex |
 | Modo de uso | agente |
 | Branch | joao-marcelo-onofre/uc31-implementacao |
-| Commits | preenchido no fim |
+| Commits | 465bffa (implementação; PR a preencher) |
 | Transcript | não disponível |
 | Sessão anterior | não se aplica |
 
@@ -19,7 +19,8 @@
 
 Implementar o caso de uso UC31 do aplicativo BurguerJá em uma branch separada, explicar o estado e a arquitetura atual do projeto, abrir um pull request e documentar o uso de IA conforme o protocolo do repositório.
 
-**Requisitos da ERS relacionados:** UC31 (detalhar após a leitura da ERS), além dos RF/RN/RNF diretamente associados.
+**Requisitos da ERS relacionados:** UC31, RF-19 a RF-23, RN-02, RN-09, RNF-04,
+RNF-13, RNF-15 e a interface WebSocket da Seção 3.4.
 
 ## Interações
 
@@ -39,7 +40,7 @@ inicie a sessao como está nos documentos do projeto
 @c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\AGENTS.md
 ```
 
-**Saída (resumo):** A sessão foi iniciada conforme o protocolo. O script `scripts/ia/autor.sh` não executou neste ambiente por uma falha de WSL/bash; o autor foi derivado de `git config user.name`. A branch `joao-marcelo-onofre/uc31-implementacao` foi criada e este registro foi iniciado antes da implementação.
+**Saída (resumo):** A sessão foi iniciada conforme o protocolo. O script `scripts/ia/autor.sh` não executou neste ambiente por uma falha de WSL/bash; o autor foi derivado de `git config user.name`. A branch `joao-marcelo-onofre/uc31-implementacao` foi criada. Foi implementado o UC31 com histórico/detalhe, webhook HMAC do SGL, WebSocket autenticado, reconexão no React, testes e documentação. O commit `465bffa` foi criado com os IDs da ERS.
 
 **Arquivos alterados:** `docs/ia/sessoes/2026-11-25_joao-marcelo-onofre_uc31-implementacao.md`
 
@@ -47,11 +48,11 @@ inicie a sessao como está nos documentos do projeto
 
 ## Resultado
 
-- **Entregue:** preenchido no fim
-- **Testes:** preenchido no fim
-- **Problemas da IA:** preenchido no fim
-- **Pendências:** preenchido no fim
+- **Entregue:** histórico e detalhe de pedidos; webhook assinado do SGL; linha do tempo persistida; WebSocket por pedido com filtro por cliente; reconexão após perda de conexão; tela de histórico e acompanhamento em português; testes e documentação do contrato.
+- **Testes:** `backend` — 153 passed, 1 warning de depreciação do Starlette; `frontend` — `npm run build` concluído; checagem de problemas sem erros; `git diff --check` limpo.
+- **Problemas da IA:** `scripts/ia/autor.sh` não executou devido à falha de WSL/bash; a instalação inicial pela ferramenta Python não refletiu no interpretador do terminal e foi corrigida instalando as versões fixadas no interpretador configurado. Nenhum problema funcional permaneceu nos testes.
+- **Pendências:** abrir o PR e obter revisão/aprovação de outro integrante; merge somente depois da revisão humana. Transcript bruto não disponível.
 
 ## Reflexão
 
-Preenchido no fim da sessão.
+O uso da ERS como fonte de verdade ajudou a manter o escopo do UC31 separado dos UCs de pagamento e fidelidade. A combinação de testes de API e WebSocket revelou o contrato necessário para a atualização em tempo real; a próxima melhoria seria validar a experiência visual em um celular real.
