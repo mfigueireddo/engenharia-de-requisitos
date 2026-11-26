@@ -6,12 +6,12 @@
 |---|---|
 | Autor (humano) | joao-marcelo-onofre |
 | Data | 2026-11-25 |
-| Duração aproximada | em andamento |
+| Duração aproximada | encerrada nesta sessão |
 | Ferramenta (harness) e versão | Codex via VS Code |
 | Modelo (ID exato) | gpt-5-codex |
 | Modo de uso | agente |
 | Branch | joao-marcelo-onofre/uc31-implementacao |
-| Commits | preenchido no fim |
+| Commits | 86f826e (scripts), e016179 (proxy WebSocket), b1f187b (reconexão; registro final a preencher) |
 | Transcript | não disponível |
 | Sessão anterior | não informada |
 
@@ -208,13 +208,124 @@ Use the 'open_browser_page' tool to open a new page or to help the user share an
 
 **Decisão humana:** aguardando validação.
 
+### 11
+
+**Prompt (literal):**
+
+```text
+rode novamente o programa
+
+No browser pages are currently shared with you.
+
+1 page is open but not shared.
+Use the 'open_browser_page' tool to open a new page or to help the user share an existing page.
+```
+
+**Saída (resumo):** As portas estavam livres, então o programa foi iniciado novamente pelo Git Bash com `bash scripts/rodar.sh`. A API subiu em `http://localhost:8000`, o frontend em `http://localhost:5173`, e as verificações HTTP retornaram API 200 (`{"status":"ok"}`) e frontend 200. Os processos continuam rodando.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** aguardando validação.
+
+### 12
+
+**Prompt (literal):**
+
+```text
+joaom@DESKTOP-N7ENPNN MINGW64 ~/Documents/GitHub/engenharia-de-requisitos (joao-marcelo-onofre/uc31-implementacao)
+$ pedido_id=2
+body='{"status":"EM_PREPARO","titulo":"Pedido em preparo","mensagem":"A cozinha iniciou o preparo."}'
+
+assinatura=$(printf '%s' "$body" \
+  | openssl dgst -sha256 -hmac "$BURGUERJA_SGL_WEBHOOK_SECRET" \
+  | awk '{print $NF}')
+
+curl -i -X POST \
+  "http://localhost:8000/api/webhooks/sgl/pedidos/$pedido_id/status" \
+  -H "Content-Type: application/json" \
+  -H "X-SGL-Signature: sha256=$assinatura" \
+  --data "$body"
+HTTP/1.1 401 Unauthorized
+date: Thu, 26 Nov 2026 00:41:42 GMT
+server: uvicorn
+content-length: 41
+content-type: application/json
+
+{"detail":"Assinatura do SGL inválida."}(.venv-1)
+
+No browser pages are currently shared with you.
+
+1 page is open but not shared.
+```
+
+**Saída (resumo):** O webhook retornou 401 porque o segredo não estava disponível no processo da API ou não era o mesmo usado para calcular a assinatura. A correção é reiniciar a API com `BURGUERJA_SGL_WEBHOOK_SECRET` exportado e usar exatamente o mesmo valor no segundo terminal.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** aguardando validação.
+
+### 13
+
+**Prompt (literal):**
+
+```text
+quero testar um pedido em rota de entrega, para ver se vai mostrar as informações pedidas no UC31
+
+Browser page: BurguerJá (http://localhost:5173/). The pageId is "9739f6cd-ab93-4df7-afcb-685667a95c6e".
+
+No browser pages are currently shared with you.
+
+1 page is open but not shared.
+Use the 'open_browser_page' tool to open a new page or to help the user share an existing page.
+```
+
+**Saída (resumo):** Foi aberto o pedido #3, da unidade BurguerJá Botafogo, modalidade Entrega. A tela exibiu taxa de R$ 0,52, endereço Praia de Botafogo, 300, tempo estimado de 33 minutos, total de R$ 7,42 e a linha do tempo com Pedido recebido. O WebSocket foi confirmado manualmente na API e pelo proxy do Vite.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** aguardando validação.
+
+### 14
+
+**Prompt (literal):**
+
+```text
+quero mudar o status para como se ele tivesse sido enviado ao cliente
+
+The following browser pages are currently shared with you and can be interacted with using the browser tools:
+- [9739f6cd-ab93-4df7-afcb-685667a95c6e] BurguerJá (http://localhost:5173/#/pedido/3) (active)
+```
+
+**Saída (resumo):** O webhook assinado foi enviado com sucesso e retornou HTTP 201. O pedido #3 mudou para `SAIU_PARA_ENTREGA`; a tela atualizou sem recarregar, mostrando o novo status e a notificação "Saiu para entrega" na linha do tempo.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** aguardando validação.
+
+### 15
+
+**Prompt (literal):**
+
+```text
+vamos encerrar a sessão, e fazer os commits que faltam, existe uma arquivo NUL que foi criado e acho q n possui funcionalidade
+
+The following browser pages are currently shared with you and can be interacted with using the browser tools:
+- [9739f6cd-ab93-4df7-afcb-685667a95c6e] BurguerJá (http://localhost:5173/#/) (active)
+```
+
+**Saída (resumo):** Em andamento: finalizar o registro da sessão, identificar e remover o arquivo `NUL` caso seja um artefato sem funcionalidade, parar os serviços locais e criar os commits pendentes.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** aguardando validação final.
+
 ## Resultado
 
-- **Entregue:** Pendente.
-- **Testes:** Inicialização pelo fluxo documentado concluída; verificação HTTP de saúde pendente.
-- **Problemas da IA:** O comando `bash scripts/ia/autor.sh` não executou corretamente neste shell por incompatibilidade aparente do arquivo com o interpretador disponível; o autor e o branch foram confirmados pelo caminho solicitado e pelo Git.
-- **Pendências:** Informar URLs/portas e acompanhar a navegação com o humano.
+- **Entregue:** programa executado pelo `scripts/rodar.sh`; tela de entrega do pedido #3 validada; status alterado para `SAIU_PARA_ENTREGA` via webhook assinado; atualização em tempo real confirmada na tela; correção do proxy WebSocket, dos finais de linha Bash e do ciclo de reconexão.
+- **Testes:** API e frontend responderam HTTP 200; `bash scripts/rodar.sh --testes` passou com 153 testes e build aprovado; WebSocket direto e pelo proxy do Vite confirmados; webhook retornou HTTP 201 e a tela atualizou sem recarregar.
+- **Problemas da IA:** Bash/WSL inicialmente não reconhecia Node ou os scripts CRLF; os scripts foram normalizados para LF e o Git Bash com fnm foi usado. O primeiro webhook retornou 401 porque a API não tinha o segredo configurado; depois foi reiniciada/configurada corretamente. O arquivo `NUL` vazio foi removido.
+- **Pendências:** abrir o PR e obter revisão/aprovação de outro integrante; merge somente depois da revisão humana. Transcript bruto não disponível.
 
 ## Reflexão
 
-Pendente até o encerramento da navegação.
+A execução guiada confirmou o fluxo completo do UC31: consulta do pedido, informações de entrega, webhook do SGL, persistência da notificação e atualização da interface via WebSocket.
