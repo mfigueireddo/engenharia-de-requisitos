@@ -319,6 +319,22 @@ The following browser pages are currently shared with you and can be interacted 
 
 **Decisão humana:** aguardando validação final.
 
+### 16
+
+**Prompt (literal):**
+
+```text
+vamos abrir o PR
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\ia\sessoes\2026-11-25_joao-marcelo-onofre_execucao-uc31.md
+```
+
+**Saída (resumo):** A branch `joao-marcelo-onofre/uc31-implementacao` foi publicada no GitHub. A página de criação do PR foi aberta, mas o GitHub solicitou autenticação; nenhuma credencial foi manipulada.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** aguardando login e criação do PR.
+
 ## Resultado
 
 - **Entregue:** programa executado pelo `scripts/rodar.sh`; tela de entrega do pedido #3 validada; status alterado para `SAIU_PARA_ENTREGA` via webhook assinado; atualização em tempo real confirmada na tela; correção do proxy WebSocket, dos finais de linha Bash e do ciclo de reconexão.
