@@ -31,13 +31,15 @@ entra aqui no mesmo commit.
 │   │   │   ├── carrinho.py   /api/carrinho — UC29 (+ adicionar/esvaziar, infra mínima)
 │   │   │   ├── cupons.py     /api/cupons e /api/cupons/aplicar — UC30
 │   │   │   ├── enderecos.py  GET /api/enderecos — só listagem, usada pelo UC28 (CRUD = UC33)
-│   │   │   └── pedidos.py    /api/pedidos/previa e /api/pedidos — UC28 (+ A3 / UC30)
+│   │   │   ├── pedidos.py    /api/pedidos/previa e /api/pedidos — UC28 (+ A3 / UC30)
+│   │   │   └── acompanhamento.py  /api/pedidos, webhook SGL e WebSocket — UC31
 │   │   ├── servicos/         Regras de negócio (cálculos e validações), sem HTTP
 │   │   │   ├── precos.py     RF-02, RF-11
 │   │   │   ├── cardapio.py   Cache do cardápio do SGL (RF-10, RF-13, RNF-03, RNF-22)
 │   │   │   ├── carrinho.py   Carrinho recalculado (UC29, E1–E3)
 │   │   │   ├── cupons.py     UC30: listagem, validação, desconto percentual/isento e uso
-│   │   │   └── checkout.py   UC28: distância, taxa, tempo, cupom (A3), total e confirmação
+│   │   │   ├── checkout.py   UC28: distância, taxa, tempo, cupom (A3), total e confirmação
+│   │   │   └── acompanhamento.py UC31: histórico, detalhe, notificações e conexões em tempo real
 │   │   └── integracoes/      Clientes dos sistemas externos, simulados (RNF-19)
 │   │       ├── base.py       Tempo limite + IntegracaoIndisponivel
 │   │       ├── sgl.py        Cardápio das unidades (SGL)
@@ -54,6 +56,7 @@ entra aqui no mesmo commit.
 │       ├── test_precos.py    RF-02, RF-10, RF-11
 │       ├── test_carrinho.py  UC29
 │       ├── test_checkout.py  UC28
+│       ├── test_acompanhamento.py UC31 (RF-19 a RF-23, RNF-13, RNF-15, WebSocket)
 │       ├── test_cupons.py    UC30 (RF-14 a RF-18, RN-07)
 │       ├── test_dinheiro.py  RNF-23
 │       ├── test_integracoes.py  RNF-19 com falhas simuladas
@@ -77,7 +80,7 @@ entra aqui no mesmo commit.
 │       ├── contextos/        Estado compartilhado: Sessao.tsx (cliente, unidade) e Carrinho.tsx
 │       ├── componentes/      Componentes reutilizáveis (Botao, Campo, Cartao, Tela, Folha...) + componentes.css
 │       └── paginas/          Uma tela por arquivo (Entrar, Inicio, Cardapio, DetalheItem, Sacola,
-│                             Cupons, Checkout, PedidoRecebido, EmBreve) + paginas.css
+│                             Cupons, Checkout, PedidoRecebido, Pedidos, AcompanharPedido, EmBreve) + paginas.css
 ├── docs/
 │   ├── srs/                  ERS em Markdown (srs-pt.md) + figuras (media/)
 │   │   └── Projeto_Relacional_de_Tabelas.drawio  Modelo relacional do grupo (ERS, Ap. B.3); abrir em app.diagrams.net
@@ -147,6 +150,11 @@ entra aqui no mesmo commit.
     própria API (`bash scripts/rodar.sh --resetar-banco`). Cenário novo para todos
     testarem entra no script (e em `tests/test_base_compartilhada.py`) no mesmo PR
     que precisar dele; CEP novo de endereço entra em `integracoes/geocodificacao.py`.
+
+21. **Atualizações do SGL no UC31** entram por `POST /api/webhooks/sgl/pedidos/{id}/status`,
+    assinado com HMAC-SHA256 no header `X-SGL-Signature` e segredo da variável
+    `BURGUERJA_SGL_WEBHOOK_SECRET`; o front-end acompanha por `GET /api/pedidos/{id}`
+    e WebSocket `/api/ws/pedidos/{id}?token=...`.
 
 ## Crescimento previsto (sugestão, não obrigatório)
 

@@ -1,0 +1,153 @@
+# Sessão: UC31 — implementação
+
+## Metadados
+
+| Campo | Valor |
+|---|---|
+| Autor (humano) | joao marcelo onofre |
+| Data | 2026-11-25 |
+| Duração aproximada | encerrada nesta sessão |
+| Ferramenta (harness) e versão | Codex via VS Code (versão do harness não informada) |
+| Modelo (ID exato) | gpt-5-codex |
+| Modo de uso | agente |
+| Branch | joao-marcelo-onofre/uc31-implementacao |
+| Commits | 465bffa (implementação), 6932271 (registro), b3bcf67 (README/estrutura), caca4d6 (apresentações), c799173 (nomes/datas), 6923d69 (restauração e novo resumo), c540f7f (registro final; PR a preencher) |
+| Transcript | não disponível |
+| Sessão anterior | não se aplica |
+
+## Objetivo
+
+Implementar o caso de uso UC31 do aplicativo BurguerJá em uma branch separada, explicar o estado e a arquitetura atual do projeto, abrir um pull request e documentar o uso de IA conforme o protocolo do repositório.
+
+**Requisitos da ERS relacionados:** UC31, RF-19 a RF-23, RN-02, RN-09, RNF-04, RNF-13, RNF-15 e a interface WebSocket da Seção 3.4.
+
+## Interações
+
+### 1
+
+**Prompt (literal):**
+
+```text
+Estou cursando a materia de engenharia de requisitos e meus colegas criaram esse repositorio para a gente desenvolver o APP pelo visto. Eu so preciso fazer um caso de uso, no caso vou escolher o UC31. Segue o relatorio que fizemos com requisitos em .md. Preciso da sua ajuda para fazer isso numa branch separada e abrir um PR.
+
+Ao mesmo tempo, quero que me explique como esta o projeto e como esta sendo feito (é até bom para você fazer igual o que ja existe). Gostaria que me explicasse como estão guardando as sessões também.
+
+inicie a sessao como está nos documentos do projeto
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\srs-pt.docx
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\AGENTS.md
+```
+
+**Saída (resumo):** A sessão foi iniciada conforme o protocolo. O script `scripts/ia/autor.sh` não executou neste ambiente por uma falha de WSL/bash; o autor foi derivado de `git config user.name`. A branch `joao-marcelo-onofre/uc31-implementacao` foi criada. Foi implementado o UC31 com histórico/detalhe, webhook HMAC do SGL, WebSocket autenticado, reconexão no React, testes e documentação.
+
+**Arquivos alterados:** este registro e os arquivos da implementação.
+
+**Decisão humana:** pendente — confirmar ao final da sessão.
+
+### 2
+
+**Prompt (literal):**
+
+```text
+antes de fazer o PR peço para que reveja como a documentação do projeto está feita, Principalmente nos pontos que vc escreveu no readme e estrutura. Os dois outros integrantes do grupo, que fizeram seus casos de uso, a IA nao me parece ter feito a mesma documentação que vc está fazendo
+```
+
+**Saída (resumo):** A revisão comparou o UC31 com os registros e commits dos UCs anteriores. O README foi mantido curto, sem seção funcional nova; o `ESTRUTURA.md` passou a listar os arquivos do UC31 diretamente na árvore e a regra do contrato do SGL ficou nas regras gerais.
+
+**Arquivos alterados:** `README.md`, `ESTRUTURA.md` e este registro.
+
+**Decisão humana:** pendente — confirmar após a revisão.
+
+### 3
+
+**Prompt (literal):**
+
+```text
+Use as sessoes antigas dos outros integrantes para alterar os documentos dessa pasta, acrecentando oque faz sentido de acordo com a nova implementação do UC31
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\apresentacoes
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\apresentacoes\2026-11-19_estado-atual-vs-ers.md
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\apresentacoes\2026-11-19_resumo-matheus-paulo.md
+```
+
+**Saída (resumo):** Foram inicialmente atualizados os dois documentos existentes com o estado do UC31; depois, por decisão do humano, essa alteração foi desfeita e os arquivos antigos foram restaurados. A documentação final ficou em um arquivo separado sobre o UC31.
+
+**Arquivos alterados:** documentos de apresentação e este registro.
+
+**Decisão humana:** pendente — confirmar após a revisão.
+
+### 4
+
+**Prompt (literal):**
+
+```text
+altere os nomes e datas dos arquivos, para ficar de acordo com o que alterou
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\ia\sessoes\2026-11-25_joao-marcelo-onofre_uc31-implementacao.md
+```
+
+**Saída (resumo):** Os documentos chegaram a ser renomeados para 25/11, mas essa renomeação foi posteriormente desfeita conforme o pedido do humano. Os nomes originais foram restaurados.
+
+**Arquivos alterados:** documentos de apresentação e este registro.
+
+**Decisão humana:** pendente — confirmar após a alteração.
+
+### 5
+
+**Prompt (literal):**
+
+```text
+vamos desfazer essa renomeação e alteração nas sessoes. Ao inves de alterar os arquivos da pasta apresentações que já existe, crie novos no mesmo estilo, para falar sobre a minha parte
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\ia\sessoes\2026-11-19_matheus-figueiredo_resumo-progresso.md
+```
+
+**Saída (resumo):** Os dois documentos rastreados de 19/11 foram restaurados com seus nomes e conteúdos originais. Foi criado `docs/apresentacoes/2026-11-25_joao-marcelo-uc31.md`, dedicado à implementação do UC31. O arquivo não rastreado `2026-11-25_resumo-matheus-paulo-hugo-joaom.md`, já existente no workspace, foi preservado sem alterações.
+
+**Arquivos alterados:** documentos de apresentação e este registro.
+
+**Decisão humana:** pendente — confirmar após a alteração.
+
+### 6
+
+**Prompt (literal):**
+
+```text
+vamos rodar o programa
+```
+
+**Saída (resumo):** O comando não foi executado porque o humano interrompeu a rodada e pediu o encerramento da sessão para iniciar uma nova sessão de execução guiada.
+
+**Arquivos alterados:** nenhum além deste registro.
+
+**Decisão humana:** pendente — confirmar após a sessão.
+
+### 7
+
+**Prompt (literal):**
+
+```text
+vamos encerrar a sessão, iniciar uma nova, para rodar o programa
+
+```
+
+**Saída (resumo):** A sessão foi encerrada com o registro da implementação, da revisão documental e da criação do resumo separado. A próxima sessão será dedicada a executar o programa e explicar cada funcionalidade durante a navegação.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** pendente — confirmar após a revisão da sessão.
+
+## Resultado
+
+- **Entregue:** implementação do UC31 no backend e frontend; webhook assinado do SGL; linha do tempo persistida; WebSocket por pedido com filtro por cliente; reconexão; testes; documentação do contrato; revisão documental; e resumo separado da contribuição do UC31.
+- **Testes:** backend com 153 testes aprovados; frontend com `npm run build` concluído; problemas reportados sem erros durante a validação.
+- **Problemas da IA:** o script `scripts/ia/autor.sh` não executou devido à falha de WSL/bash; a instalação inicial das dependências Python não refletiu no interpretador do terminal e foi corrigida. A ordem das interações deste registro também precisou ser reorganizada antes do encerramento.
+- **Pendências:** abrir o PR e obter revisão/aprovação de outro integrante; executar o programa e fazer a explicação guiada na próxima sessão; merge somente depois da revisão humana. Transcript bruto não disponível.
+
+## Reflexão
+
+A ERS foi usada como fonte de verdade para manter o UC31 separado dos UCs de pagamento e fidelidade. A comparação com as sessões antigas ajudou a preservar o padrão documental do grupo, deixando a apresentação do UC31 em um arquivo próprio. A próxima sessão deve validar a experiência visual executando o programa em conjunto com o humano.
+
