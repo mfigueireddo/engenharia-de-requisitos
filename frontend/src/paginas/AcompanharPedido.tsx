@@ -32,7 +32,12 @@ export default function AcompanharPedido({ pedidoId }: { pedidoId: number }) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-    if (socketRef.current) socketRef.current.close();
+    if (socketRef.current) {
+      // Fechamento intencional não deve disparar uma reconexão do socket antigo.
+      socketRef.current.onclose = null;
+      socketRef.current.onerror = null;
+      socketRef.current.close();
+    }
     const socket = api.conectarPedido(pedidoId);
     socketRef.current = socket;
     socket.onopen = () => setDesconectado(false);
@@ -45,7 +50,8 @@ export default function AcompanharPedido({ pedidoId }: { pedidoId: number }) {
     };
     socket.onerror = () => setDesconectado(true);
     socket.onclose = () => {
-      if (!ativoRef.current) return;
+      // Ignora eventos atrasados de uma conexão substituída (StrictMode/reconnect).
+      if (!ativoRef.current || socketRef.current !== socket) return;
       setDesconectado(true);
       timerRef.current = window.setTimeout(conectar, 2000);
     };
@@ -61,7 +67,12 @@ export default function AcompanharPedido({ pedidoId }: { pedidoId: number }) {
       ativoRef.current = false;
       window.removeEventListener("online", aoVoltarOnline);
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-      socketRef.current?.close();
+      if (socketRef.current) {
+        socketRef.current.onclose = null;
+        socketRef.current.onerror = null;
+        socketRef.current.close();
+        socketRef.current = null;
+      }
     };
   }, [carregar, conectar]);
 
@@ -73,7 +84,7 @@ export default function AcompanharPedido({ pedidoId }: { pedidoId: number }) {
   const status = STATUS_PEDIDO[pedido.status];
   return (
     <Tela titulo={`Pedido #${pedido.id}`} subtitulo={pedido.unidade.nome} aoVoltar={voltar}>
-      {desconectado ? <Aviso tom="aviso">Sem conexão em tempo real. Mostrando o último status recebido; tentando reconectar…</Aviso> : null}
+      {desconectado ? <Aviso tom="aviso">As atualizações automáticas estão temporariamente indisponíveis. O status exibido é o último recebido.</Aviso> : null}
       <div className="pedido-detalhe__status">
         <Selo tom={status.tom}>{status.nome}</Selo>
         <span className="texto-suave">Atualizado {dataHora(pedido.atualizado_em)}</span>

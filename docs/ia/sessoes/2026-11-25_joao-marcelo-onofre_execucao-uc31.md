@@ -173,6 +173,41 @@ scripts/rodar.sh: line 14: $'\\r': command not found
 
 **Decisão humana:** aguardando validação.
 
+### 9
+
+**Prompt (literal):**
+
+```text
+rode o programa para mim
+
+@c:\Users\joaom\Documents\GitHub\engenharia-de-requisitos\docs\ia\sessoes\2026-11-25_joao-marcelo-onofre_execucao-uc31.md
+```
+
+**Saída (resumo):** O programa foi executado pelo fluxo oficial `scripts/rodar.sh` usando Git Bash. A API subiu em `http://localhost:8000`, o frontend em `http://localhost:5173`, e as verificações HTTP retornaram API 200 (`{"status":"ok"}`) e frontend 200. Os processos continuam rodando.
+
+**Arquivos alterados:** este registro.
+
+**Decisão humana:** aguardando validação.
+
+### 10
+
+**Prompt (literal):**
+
+```text
+a tela fica piscando devido a atualização em tempo real
+
+No browser pages are currently shared with you.
+
+1 page is open but not shared.
+Use the 'open_browser_page' tool to open a new page or to help the user share an existing page.
+```
+
+**Saída (resumo):** Identificado um ciclo de reconexão causado por eventos `onclose` atrasados quando o React substitui conexões WebSocket. O componente será ajustado para ignorar sockets antigos e não reconectar após fechamentos intencionais.
+
+**Arquivos alterados:** `frontend/src/paginas/AcompanharPedido.tsx` e este registro.
+
+**Decisão humana:** aguardando validação.
+
 ## Resultado
 
 - **Entregue:** Pendente.
